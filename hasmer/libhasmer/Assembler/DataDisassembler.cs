@@ -83,7 +83,9 @@ namespace Hasmer.Assembler {
                     default:
                         break;
                 }
-                IEnumerable<PrimitiveValue> mapped = items.Items.Select(x => {
+                IEnumerable<PrimitiveValue> mapped = items.Items
+                    .Where(x=> x is not null) // skip bad values FIXME
+                    .Select(x => {
                     if (x.TypeCode == TypeCode.String) {
                         x.SetValue(StringEscape.Escape(x.GetValue<string>()));
                     }

@@ -85,8 +85,13 @@ namespace Hasmer {
                 HbcDataBufferPrefix prefix = ReadTagType(reader);
                 PrimitiveValue[] values = new PrimitiveValue[prefix.Length];
                 // Console.WriteLine("  prefix: " + prefix.ToString());
-                for (int i = 0; i < values.Length; i++) {
-                    values[i] = ReadValue(source, prefix.TagType, reader);
+                for (int i = 0; i < values.Length && ms.Position < ms.Length; i++) {
+                    try {
+                        values[i] = ReadValue(source, prefix.TagType, reader);
+
+                    } catch (EndOfStreamException) {
+                        Console.WriteLine("Warn trying to read beyond end");
+                    }
                     // Console.WriteLine("  Read value: " + values[i].ToString());
                 }
                 itemsList.Add(new HbcDataBufferItems {

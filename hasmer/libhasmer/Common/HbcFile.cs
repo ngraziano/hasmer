@@ -422,7 +422,8 @@ namespace Hasmer {
 
         public StringTableEntry GetStringTableEntry(int index) {
             if (index < 0 || index >= StringTable.Length) {
-                throw new Exception("out of bounds string index: " + index);
+                return new StringTableEntry(StringKind.Literal, "out of bounds string index: " + index, false);
+                // throw new Exception("out of bounds string index: " + index);
             }
             return StringTable[index];
         }

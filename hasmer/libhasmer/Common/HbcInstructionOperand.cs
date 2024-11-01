@@ -78,9 +78,9 @@ namespace Hasmer {
         /// </summary>
         public T GetResolvedValue<T>(HbcFile file) {
             return Type switch {
-                HbcInstructionOperandType.UInt8S => (T)(object)file.GetStringTableEntry((int)GetValue<byte>()),
-                HbcInstructionOperandType.UInt16S => (T)(object)file.GetStringTableEntry((int)GetValue<ushort>()),
-                HbcInstructionOperandType.UInt32S => (T)(object)file.GetStringTableEntry((int)GetValue<uint>()),
+                HbcInstructionOperandType.UInt8S => (T)(object)file.GetStringTableEntry((int)GetValue<byte>()).Value,
+                HbcInstructionOperandType.UInt16S => (T)(object)file.GetStringTableEntry((int)GetValue<ushort>()).Value,
+                HbcInstructionOperandType.UInt32S => (T)(object)file.GetStringTableEntry((int)GetValue<uint>()).Value,
                 _ => GetValue<T>()
             };
         }
