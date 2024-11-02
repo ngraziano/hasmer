@@ -41,7 +41,7 @@ namespace Hasmer.Decompiler.Visitor {
                     Property = new Identifier("Array")
                 },
                 Arguments = new List<SyntaxNode>() {
-                        new Literal(new PrimitiveValue(arrayLength))
+                        new Literal(new PrimitiveIntegerValue(arrayLength))
                     },
                 IsCalleeConstructor = true
             });
@@ -68,10 +68,12 @@ namespace Hasmer.Decompiler.Visitor {
             };
 
             for (int i = 0; i < itemsCount; i++) {
-                string keyAsString = keys[i].TypeCode switch {
+                /*string keyAsString = keys[i].TypeCode switch {
                     TypeCode.String => keys[i].GetValue<string>(),
                     _ => keys[i].RawValue?.ToString() ?? "null"
-                };
+                };*/
+                // mayne encode
+                string keyAsString = keys[i].ToString();
 
                 SyntaxNode key;
                 if (Identifier.NamePattern.IsMatch(keyAsString)) {

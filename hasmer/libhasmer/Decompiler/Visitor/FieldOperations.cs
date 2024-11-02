@@ -163,7 +163,7 @@ namespace Hasmer.Decompiler.Visitor {
 
         [Visitor]
         public static void PutOwnByIndex(DecompilerContext context) =>
-            CommonPutById(context, new Literal(new PrimitiveValue(context.Instruction.Operands[2].GetValue<uint>())));
+            CommonPutById(context, new Literal(new PrimitiveIntegerValue(context.Instruction.Operands[2].GetValue<uint>())));
 
         /// <summary>
         /// Gets a field reference by value (i.e. the value contained within an identifier).

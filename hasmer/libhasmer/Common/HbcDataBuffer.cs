@@ -137,14 +137,14 @@ namespace Hasmer {
         private PrimitiveValue ReadValue(HbcFile source, HbcDataBufferTagType tagType, BinaryReader reader) {
             // new PrimitiveValue made for each switch to preserve the PrimitiveValue type tagging mechanism for numbers
             return tagType switch {
-                HbcDataBufferTagType.ByteString => new PrimitiveValue(source.GetStringTableEntry((int)reader.ReadByte()).Value),
-                HbcDataBufferTagType.ShortString => new PrimitiveValue(source.GetStringTableEntry((int)reader.ReadUInt16()).Value),
-                HbcDataBufferTagType.LongString => new PrimitiveValue(source.GetStringTableEntry((int)reader.ReadUInt32()).Value),
-                HbcDataBufferTagType.Number => new PrimitiveValue(reader.ReadDouble()),
-                HbcDataBufferTagType.Integer => new PrimitiveValue(reader.ReadInt32()),
-                HbcDataBufferTagType.Null => new PrimitiveValue(null),
-                HbcDataBufferTagType.True => new PrimitiveValue(true),
-                HbcDataBufferTagType.False => new PrimitiveValue(false),
+                HbcDataBufferTagType.ByteString => new PrimitiveIdxStringValue(reader.ReadByte(),source),
+                HbcDataBufferTagType.ShortString => new PrimitiveIdxStringValue(reader.ReadUInt16(),source),
+                HbcDataBufferTagType.LongString => new PrimitiveIdxStringValue((int)reader.ReadUInt32(),source),
+                HbcDataBufferTagType.Number => new PrimitiveNumberValue(reader.ReadDouble()),
+                HbcDataBufferTagType.Integer => new PrimitiveIntegerValue(reader.ReadInt32()),
+                HbcDataBufferTagType.Null => new PrimitiveNullValue(),
+                HbcDataBufferTagType.True => new PrimitiveBoolValue(true),
+                HbcDataBufferTagType.False => new PrimitiveBoolValue(false),
                 _ => throw new InvalidOperationException()
             };
         }

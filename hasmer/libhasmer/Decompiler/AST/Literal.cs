@@ -13,7 +13,7 @@ namespace Hasmer.Decompiler.AST {
         }
 
         public override void WriteDirect(SourceCodeBuilder builder) {
-            if (Value.TypeCode == TypeCode.String) {
+            if (Value is PrimitiveIdxStringValue) {
                 builder.Write("'");
                 builder.Write(StringEscape.Escape(Value.ToString()));
                 builder.Write("'");
@@ -23,7 +23,7 @@ namespace Hasmer.Decompiler.AST {
         }
 
         public override string ToString() {
-            if (Value.TypeCode == TypeCode.String) {
+            if (Value is PrimitiveIdxStringValue) {
                 return $"'{Value}'";
             }
             return Value?.ToString() ?? "Literal(null)";

@@ -35,7 +35,7 @@ namespace Hasmer.Decompiler.Visitor {
         [Visitor]
         public static void LoadConstNull(DecompilerContext context) {
             byte register = context.Instruction.Operands[0].GetValue<byte>();
-            context.Block.WriteResult(register, new Literal(new PrimitiveValue(null)));
+            context.Block.WriteResult(register, new Literal(new PrimitiveNullValue()));
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Hasmer.Decompiler.Visitor {
         [Visitor]
         public static void LoadConstTrue(DecompilerContext context) {
             byte register = context.Instruction.Operands[0].GetValue<byte>();
-            context.Block.WriteResult(register, new Literal(new PrimitiveValue(true)));
+            context.Block.WriteResult(register, new Literal(new PrimitiveBoolValue(true)));
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Hasmer.Decompiler.Visitor {
         [Visitor]
         public static void LoadConstFalse(DecompilerContext context) {
             byte register = context.Instruction.Operands[0].GetValue<byte>();
-            context.Block.WriteResult(register, new Literal(new PrimitiveValue(false)));
+            context.Block.WriteResult(register, new Literal(new PrimitiveBoolValue(false)));
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Hasmer.Decompiler.Visitor {
         [Visitor]
         public static void LoadConstZero(DecompilerContext context) {
             byte register = context.Instruction.Operands[0].GetValue<byte>();
-            context.Block.WriteResult(register, new Literal(new PrimitiveValue(0)));
+            context.Block.WriteResult(register, new Literal(new PrimitiveNumberValue(0)));
         }
 
         /// <summary>
@@ -71,25 +71,18 @@ namespace Hasmer.Decompiler.Visitor {
         [Visitor]
         public static void LoadConstString(DecompilerContext context) {
             byte register = context.Instruction.Operands[0].GetValue<byte>();
-            string str = context.Instruction.Operands[1].GetResolvedValue<string>(context.Source);
-            context.Block.WriteResult(register, new Literal(new PrimitiveValue(str)));
+            context.Block.WriteResult(register, new Literal(new PrimitiveIdxStringValue(context.Instruction.Operands[1].GetValue<int>(), context.Source)));
         }
 
-        /// <summary>
-        /// Loads a given constant numerical value into the specified register, coerced as type T.
-        /// </summary>
-        private static void LoadConstNumerical<T>(DecompilerContext context) {
-            byte register = context.Instruction.Operands[0].GetValue<byte>();
-            T value = context.Instruction.Operands[1].GetValue<T>();
-            context.Block.WriteResult(register, new Literal(new PrimitiveValue(value)));
-        }
-
+   
         /// <summary>
         /// Loads a constant unsigned byte into the specified register.
         /// </summary>
         [Visitor]
         public static void LoadConstUInt8(DecompilerContext context) {
-            LoadConstNumerical<byte>(context);
+            byte register = context.Instruction.Operands[0].GetValue<byte>();
+            byte value = context.Instruction.Operands[1].GetValue<byte>();
+            context.Block.WriteResult(register, new Literal(new PrimitiveIntegerValue(value)));
         }
 
         /// <summary>
@@ -97,7 +90,9 @@ namespace Hasmer.Decompiler.Visitor {
         /// </summary>
         [Visitor]
         public static void LoadConstInt(DecompilerContext context) {
-            LoadConstNumerical<uint>(context);
+            byte register = context.Instruction.Operands[0].GetValue<byte>();
+            uint value = context.Instruction.Operands[1].GetValue<byte>();
+            context.Block.WriteResult(register, new Literal(new PrimitiveIntegerValue(value)));
         }
 
         /// <summary>
@@ -105,7 +100,9 @@ namespace Hasmer.Decompiler.Visitor {
         /// </summary>
         [Visitor]
         public static void LoadConstDouble(DecompilerContext context) {
-            LoadConstNumerical<double>(context);
+            byte register = context.Instruction.Operands[0].GetValue<byte>();
+            double value = context.Instruction.Operands[1].GetValue<byte>();
+            context.Block.WriteResult(register, new Literal(new PrimitiveNumberValue(value)));
         }
     }
 }

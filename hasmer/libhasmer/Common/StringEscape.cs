@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace Hasmer {
             } else if (double.IsNaN(d)) {
                 return "NaN";
             } else {
-                return d.ToString(DoubleFixedPoint);
+                return d.ToString(DoubleFixedPoint, CultureInfo.InvariantCulture);
             }
         }
     }

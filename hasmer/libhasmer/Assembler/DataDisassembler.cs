@@ -83,13 +83,13 @@ namespace Hasmer.Assembler {
                     default:
                         break;
                 }
-                IEnumerable<PrimitiveValue> mapped = items.Items
+                IEnumerable<string> mapped = items.Items
                     .Where(x=> x is not null) // skip bad values FIXME
                     .Select(x => {
-                    if (x.TypeCode == TypeCode.String) {
-                        x.SetValue(StringEscape.Escape(x.GetValue<string>()));
+                    if (x is PrimitiveIdxStringValue) {
+                        return StringEscape.Escape(x.ToString());
                     }
-                    return x;
+                    return x.ToString();
                 });
                 string tagType = items.Prefix.TagType switch {
                     HbcDataBufferTagType.ByteString or HbcDataBufferTagType.ShortString or HbcDataBufferTagType.LongString => "String",

@@ -45,24 +45,24 @@ namespace Hasmer {
         /// Reads the operand from a stream of binary data.
         /// </summary>
         public static HbcInstructionOperand FromReader(BinaryReader reader, HbcInstructionOperandType type) {
-            object rawValue = type switch {
-                HbcInstructionOperandType.Reg8 => reader.ReadByte(),
-                HbcInstructionOperandType.Reg32 => reader.ReadUInt32(),
-                HbcInstructionOperandType.UInt8 => reader.ReadByte(),
-                HbcInstructionOperandType.UInt16 => reader.ReadUInt16(),
-                HbcInstructionOperandType.UInt32 => reader.ReadUInt32(),
-                HbcInstructionOperandType.Addr8 => reader.ReadSByte(),
-                HbcInstructionOperandType.Addr32 => reader.ReadInt32(),
-                HbcInstructionOperandType.Imm32 => reader.ReadUInt32(),
-                HbcInstructionOperandType.Double => reader.ReadDouble(),
-                HbcInstructionOperandType.UInt8S => reader.ReadByte(),
-                HbcInstructionOperandType.UInt16S => reader.ReadUInt16(),
-                HbcInstructionOperandType.UInt32S => reader.ReadUInt32(),
+            PrimitiveValue value = type switch {
+                HbcInstructionOperandType.Reg8 => new PrimitiveIntegerValue(reader.ReadByte()),
+                HbcInstructionOperandType.Reg32 => new PrimitiveIntegerValue(reader.ReadUInt32()),
+                HbcInstructionOperandType.UInt8 => new PrimitiveIntegerValue(reader.ReadByte()),
+                HbcInstructionOperandType.UInt16 => new PrimitiveIntegerValue(reader.ReadUInt16()),
+                HbcInstructionOperandType.UInt32 => new PrimitiveIntegerValue(reader.ReadUInt32()),
+                HbcInstructionOperandType.Addr8 => new PrimitiveIntegerValue(reader.ReadSByte()),
+                HbcInstructionOperandType.Addr32 => new PrimitiveIntegerValue(reader.ReadInt32()),
+                HbcInstructionOperandType.Imm32 => new PrimitiveIntegerValue(reader.ReadUInt32()),
+                HbcInstructionOperandType.Double => new PrimitiveNumberValue(reader.ReadDouble()),
+                HbcInstructionOperandType.UInt8S => new PrimitiveIntegerValue(reader.ReadByte()),
+                HbcInstructionOperandType.UInt16S => new PrimitiveIntegerValue(reader.ReadUInt16()),
+                HbcInstructionOperandType.UInt32S => new PrimitiveIntegerValue(reader.ReadUInt32()),
                 _ => throw new InvalidOperationException("invalid operand type"),
             };
             return new HbcInstructionOperand {
                 Type = type,
-                Value = new PrimitiveValue(rawValue)
+                Value = value,
             };
         }
 

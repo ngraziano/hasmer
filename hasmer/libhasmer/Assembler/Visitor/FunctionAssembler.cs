@@ -107,7 +107,7 @@ namespace Hasmer.Assembler.Visitor {
                     // insert a cache index of 0 as the third operand
                     insn.Operands.Insert(2, new HasmOperandToken(null) {
                         OperandType = HasmOperandTokenType.UInt,
-                        Value = new PrimitiveValue((byte)0),
+                        Value = new PrimitiveIntegerValue((byte)0),
                     });
                 }
 
@@ -124,23 +124,23 @@ namespace Hasmer.Assembler.Visitor {
                 HasmOperandToken operand = insn.Operands[i];
                 HbcInstructionOperandType type = def.OperandTypes[i];
 
-                if (operand.Value.TypeCode == TypeCode.String) {
+                if (operand.Value is PrimitiveIdxStringValue) {
                     uint stringId = HbcAssembler.DataAssembler.GetStringId(operand.Value.GetValue<string>(), operand.OperandStringKind);
                     if (type == HbcInstructionOperandType.UInt8S) {
                         if (stringId > byte.MaxValue) {
                             throw new Exception("string ID cannot fit into UInt8");
                         }
-                        operand.Value = new PrimitiveValue((byte)stringId); // convert string to ID
+                        operand.Value = new PrimitiveIntegerValue((byte)stringId); // convert string to ID
                     } else if (type == HbcInstructionOperandType.UInt16S) {
                         if (stringId > ushort.MaxValue) {
                             throw new Exception("string ID cannot fit into UInt16");
                         }
-                        operand.Value = new PrimitiveValue((ushort)stringId); // convert string to ID
+                        operand.Value = new PrimitiveIntegerValue((ushort)stringId); // convert string to ID
                     } else if (type == HbcInstructionOperandType.UInt32S) {
                         if (stringId > uint.MaxValue) {
                             throw new Exception("string ID cannot fit into UInt32");
                         }
-                        operand.Value = new PrimitiveValue(stringId); // convert string to ID
+                        operand.Value = new PrimitiveIntegerValue(stringId); // convert string to ID
                     }
                 } else if (type == HbcInstructionOperandType.Addr8) {
                     writer.Write(operand.Value.GetValue<sbyte>());

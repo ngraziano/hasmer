@@ -15,19 +15,19 @@ namespace Hasmer.Assembler.Parser {
         public PrimitiveValue GetCompactValue(bool signed) {
             if (signed) {
                 if (Value >= sbyte.MinValue && Value <= sbyte.MaxValue) {
-                    return new PrimitiveValue((sbyte)Value);
+                    return new PrimitiveIntegerValue((sbyte)Value);
                 } else if (Value >= short.MinValue && Value <= short.MaxValue) {
-                    return new PrimitiveValue((short)Value);
+                    return new PrimitiveIntegerValue((short)Value);
                 } else if (Value >= int.MinValue && Value <= int.MaxValue) {
-                    return new PrimitiveValue((int)Value);
+                    return new PrimitiveIntegerValue((int)Value);
                 }
             } else {
                 if (Value >= byte.MinValue && Value <= byte.MaxValue) {
-                    return new PrimitiveValue((byte)Value);
+                    return new PrimitiveIntegerValue((byte)Value);
                 } else if (Value >= ushort.MinValue && Value <= ushort.MaxValue) {
-                    return new PrimitiveValue((ushort)Value);
+                    return new PrimitiveIntegerValue((ushort)Value);
                 } else if (Value >= uint.MinValue && Value <= uint.MaxValue) {
-                    return new PrimitiveValue((uint)Value);
+                    return new PrimitiveIntegerValue((uint)Value);
                 }
             }
 
@@ -44,34 +44,34 @@ namespace Hasmer.Assembler.Parser {
                     if (Value < sbyte.MinValue || Value > sbyte.MaxValue) {
                         throw new HasmParserException(this, $"integer is not sbyte: {Value}");
                     }
-                    return new PrimitiveValue((sbyte)Value);
+                    return new PrimitiveIntegerValue((sbyte)Value);
                 } else if (size == 2) {
                     if (Value < short.MinValue || Value > short.MaxValue) {
                         throw new HasmParserException(this, $"integer is not short: {Value}");
                     }
-                    return new PrimitiveValue((short)Value);
+                    return new PrimitiveIntegerValue((short)Value);
                 } else if (size == 4) {
                     if (Value < int.MinValue || Value > int.MaxValue) {
                         throw new HasmParserException(this, $"integer is not int: {Value}");
                     }
-                    return new PrimitiveValue((int)Value);
+                    return new PrimitiveIntegerValue((int)Value);
                 }
             } else {
                 if (size == 1) {
                     if (Value < byte.MinValue || Value > byte.MaxValue) {
                         throw new HasmParserException(this, $"integer is not byte: {Value}");
                     }
-                    return new PrimitiveValue((byte)Value);
+                    return new PrimitiveIntegerValue((byte)Value);
                 } else if (size == 2) {
                     if (Value < ushort.MinValue || Value > ushort.MaxValue) {
                         throw new HasmParserException(this, $"integer is not ushort: {Value}");
                     }
-                    return new PrimitiveValue((ushort)Value);
+                    return new PrimitiveIntegerValue((ushort)Value);
                 } else if (size == 4) {
                     if (Value < uint.MinValue || Value > uint.MaxValue) {
                         throw new HasmParserException(this, $"integer is not int: {Value}");
                     }
-                    return new PrimitiveValue((uint)Value);
+                    return new PrimitiveIntegerValue((uint)Value);
                 }
             }
 

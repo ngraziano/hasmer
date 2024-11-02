@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Hasmer.Assembler;
 using Hasmer.Decompiler.AST;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Reflection.PortableExecutable;
 
 namespace Hasmer.Decompiler {
     /// <summary>
@@ -51,6 +53,20 @@ namespace Hasmer.Decompiler {
             }
 
             foreach (HbcSmallFuncHeader header in Source.SmallFuncHeaders) {
+
+                if((header.Flags & HbcFuncHeaderFlags.Overflowed)!=0) {
+                    header.ParamCount = header.Large.ParamCount;
+                    header.BytecodeSizeInBytes = header.Large.BytecodeSizeInBytes;
+                    header.FunctionName = header.Large.FunctionName;
+                    header.Offset = header.Large.Offset;
+                    header.InfoOffset = header.Large.InfoOffset;
+                    header.FrameSize = header.Large.FrameSize;
+                    header.EnvironmentSize = header.Large.EnvironmentSize;
+                    header.HighestReadCacheIndex = header.Large.HighestReadCacheIndex;
+                    header.HighestWriteCacheIndex = header.Large.HighestWriteCacheIndex;
+                    header.Flags = header.Large.Flags;
+                }
+
                 List<HbcInstruction> insns = header.Disassemble();
                 foreach (HbcInstruction insn in insns) {
                     HbcInstructionDefinition def = Source.BytecodeFormat.Definitions[insn.Opcode];
