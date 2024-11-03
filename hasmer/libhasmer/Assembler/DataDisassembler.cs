@@ -42,13 +42,13 @@ namespace Hasmer.Assembler {
         /// the elements from all entries are returned in order.
         /// This enables reading over multiple entries at once.
         /// </summary>
-        public PrimitiveValue[] GetElementSeries(List<HbcDataBufferItems> buffer, uint offset, uint length) {
-            PrimitiveValue[] series = new PrimitiveValue[length];
+        public static List<PrimitiveValue> GetElementSeries(List<HbcDataBufferItems> buffer, uint offset, int length) {
+            var series = new List<PrimitiveValue>(length);
             var idx = buffer.FindIndex(item => item.Offset == offset);
             if (idx < 0) throw new IndexOutOfRangeException("Offset invalid");
 
             for (int i = 0; i < length; i++) {
-                series[i] = buffer[idx + i].Items;
+                series.Add(buffer[idx + i].Items);
             }
             return series;
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Hasmer.Assembler;
 using Hasmer.Decompiler.AST;
 
 namespace Hasmer.Decompiler.Visitor {
@@ -60,8 +61,8 @@ namespace Hasmer.Decompiler.Visitor {
             context.State.Variables[resultRegister] = "obj" + resultRegister;
             context.State.Registers[resultRegister] = new Identifier(context.State.Variables[resultRegister]);
 
-            PrimitiveValue[] keys = context.Decompiler.DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.KeyBuffer, keyBufferIndex, itemsCount);
-            PrimitiveValue[] values = context.Decompiler.DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.ValueBuffer, valueBufferIndex, itemsCount);
+            var keys = DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.KeyBuffer, keyBufferIndex, itemsCount);
+            var values = DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.ValueBuffer, valueBufferIndex, itemsCount);
 
             ObjectExpression obj = new ObjectExpression {
                 Properties = new List<ObjectExpressionProperty>(itemsCount)
@@ -103,10 +104,11 @@ namespace Hasmer.Decompiler.Visitor {
             context.State.Variables[resultRegister] = "arr" + resultRegister;
             context.State.Registers[resultRegister] = new Identifier(context.State.Variables[resultRegister]);
 
-            PrimitiveValue[] items = context.Decompiler.DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.ArrayBuffer, arrayBufferIndex, itemsCount);
+            var items = DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.ArrayBuffer, arrayBufferIndex, itemsCount);
 
-            ArrayExpression arr = new ArrayExpression();
-            arr.Elements = items.Select(item => new Literal(item)).Cast<SyntaxNode>().ToList();
+            var arr = new ArrayExpression {
+                Elements = items.Select(item => new Literal(item)).Cast<SyntaxNode>().ToList()
+            };
 
             context.Block.WriteResult(resultRegister, arr);
         }

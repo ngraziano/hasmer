@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -163,12 +164,14 @@ namespace Hasmer.Assembler {
         }
 
         private string AnnotateObject(uint keyBufferIndex, uint valueBufferIndex, ushort length) {
-            PrimitiveValue[] keys = Disassembler.DataDisassembler.GetElementSeries(Disassembler.DataDisassembler.KeyBuffer, keyBufferIndex, length);
-            PrimitiveValue[] values = Disassembler.DataDisassembler.GetElementSeries(Disassembler.DataDisassembler.ValueBuffer, valueBufferIndex, length);
+            var keys = DataDisassembler.GetElementSeries(Disassembler.DataDisassembler.KeyBuffer, keyBufferIndex, length);
+            var values = DataDisassembler.GetElementSeries(Disassembler.DataDisassembler.ValueBuffer, valueBufferIndex, length);
 
-            JObject obj = new JObject();
-            for (int i = 0; i < length; i++) {
-                obj[keys[i].ToString()] = new JValue(values[i].RawValue);
+            Debug.Assert(keys.Count == values.Count, "Invalid number of value received");
+
+            var obj = new JObject();
+            foreach (var (key, value) in keys.Zip(values)) {
+                obj[key.ToString()] = new JValue(value.RawValue);
             }
 
             return obj.ToString(Formatting.None);
