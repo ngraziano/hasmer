@@ -41,15 +41,12 @@ namespace Hasmer {
     /// <summary>
     /// Represents an entry in the data buffer (data type and subsequent items).
     /// </summary>
-    public class HbcDataBufferItems {
-        /// <summary>
-        /// The header for the data buffer entry.
-        /// </summary>
-        public HbcDataBufferPrefix Prefix { get; set; }
+    public record HbcDataBufferItems {
+        public HbcDataBufferTagType TagType { get; set; }
         /// <summary>
         /// The items for the data buffer entry.
         /// </summary>
-        public PrimitiveValue[] Items { get; set; }
+        public PrimitiveValue Items { get; set; }
         /// <summary>
         /// The offset of the entry (from the start of the header) relative to the start of the entire buffer.
         /// </summary>
@@ -76,29 +73,30 @@ namespace Hasmer {
         /// Reads the entire buffer and disassembles it into HbcDataBufferItems objects for each entry in the buffer.
         /// </summary>
         public List<HbcDataBufferItems> ReadAll(HbcFile source) {
-            using MemoryStream ms = new MemoryStream(Buffer);
-            using BinaryReader reader = new BinaryReader(ms);
+            using var ms = new MemoryStream(Buffer);
+            using var reader = new BinaryReader(ms);
 
-            List<HbcDataBufferItems> itemsList = new List<HbcDataBufferItems>();
+            var itemsList = new List<HbcDataBufferItems>();
             while (ms.Position < ms.Length) {
                 uint offset = (uint)ms.Position;
                 HbcDataBufferPrefix prefix = ReadTagType(reader);
-                PrimitiveValue[] values = new PrimitiveValue[prefix.Length];
                 // Console.WriteLine("  prefix: " + prefix.ToString());
-                for (int i = 0; i < values.Length && ms.Position < ms.Length; i++) {
+                for (int i = 0; i < prefix.Length && ms.Position < ms.Length; i++) {
                     try {
-                        values[i] = ReadValue(source, prefix.TagType, reader);
-
+                        var value = ReadValue(source, prefix.TagType, reader);
+                        itemsList.Add(new HbcDataBufferItems {
+                            TagType = prefix.TagType,
+                            Items = value,
+                            Offset = offset
+                        });
+                        offset = (uint)ms.Position;
                     } catch (EndOfStreamException) {
                         Console.WriteLine("Warn trying to read beyond end");
                     }
                     // Console.WriteLine("  Read value: " + values[i].ToString());
+                  
                 }
-                itemsList.Add(new HbcDataBufferItems {
-                    Prefix = prefix,
-                    Items = values,
-                    Offset = offset
-                });
+
             }
 
             return itemsList;
@@ -111,25 +109,7 @@ namespace Hasmer {
             writer.Write(Buffer);
         }
 
-        /// <summary>
-        /// Disassembles a single HbcDataBufferItems from an offset in the data buffer (e.g. from an instruction operand).
-        /// </summary>
-        public HbcDataBufferItems Read(HbcFile source, uint offset) {
-            using MemoryStream ms = new MemoryStream(Buffer);
-            using BinaryReader reader = new BinaryReader(ms);
-            ms.Position = offset;
 
-            HbcDataBufferPrefix prefix = ReadTagType(reader);
-            PrimitiveValue[] values = new PrimitiveValue[prefix.Length];
-            for (int i = 0; i < values.Length; i++) {
-                values[i] = ReadValue(source, prefix.TagType, reader);
-            }
-
-            return new HbcDataBufferItems {
-                Prefix = prefix,
-                Items = values
-            };
-        }
 
         /// <summary>
         /// Reads a single PrimitiveValue from a stream given the type of the value.

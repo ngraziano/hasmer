@@ -13,7 +13,6 @@ namespace Hasmer {
         /// </summary>
         public abstract object RawValue { get;}
 
-
         /// <summary>
         /// Returns the raw value coerced to a ulong.
         /// The the raw value is not an integer type, an exception is thrown.

@@ -44,26 +44,11 @@ namespace Hasmer.Assembler {
         /// </summary>
         public PrimitiveValue[] GetElementSeries(List<HbcDataBufferItems> buffer, uint offset, uint length) {
             PrimitiveValue[] series = new PrimitiveValue[length];
-            int currentIndex = 0;
+            var idx = buffer.FindIndex(item => item.Offset == offset);
+            if (idx < 0) throw new IndexOutOfRangeException("Offset invalid");
+
             for (int i = 0; i < length; i++) {
-                HbcDataBufferItems items = buffer.Find(item => item.Offset == offset);
-                series[i] = items.Items[currentIndex++];
-
-                if (currentIndex >= items.Items.Length) {
-                    int nextIndex = buffer.IndexOf(items) + 1;
-                    if (nextIndex == buffer.Count) {
-                        // exit early as to not access outside the bounds of `buffer`
-                        if (i == length - 1) {
-                            return series;
-                        }
-
-                        // if we didn't read all the expected items until `length`
-                        // throw an exception
-                        throw new IndexOutOfRangeException("length");
-                    }
-                    offset = buffer[nextIndex].Offset;
-                    currentIndex = 0;
-                }
+                series[i] = buffer[idx + i].Items;
             }
             return series;
         }
@@ -74,29 +59,26 @@ namespace Hasmer.Assembler {
         private void AppendDisassembly(StringBuilder builder, List<HbcDataBufferItems> buffer, char prefix) {
             for (int i = 0; i < buffer.Count; i++) {
                 HbcDataBufferItems items = buffer[i];
-                switch (items.Prefix.TagType) {
+                switch (items.TagType) {
                     case HbcDataBufferTagType.Null:
                     case HbcDataBufferTagType.True:
                     case HbcDataBufferTagType.False:
-                        builder.AppendLine($".data {prefix}{i} {items.Prefix.TagType}[{items.Items.Length}]");
+                        builder.AppendLine($".data {prefix}{i} Off:{items.Offset} {items.TagType}[]");
                         continue;
                     default:
                         break;
                 }
-                IEnumerable<string> mapped = items.Items
-                    .Where(x=> x is not null) // skip bad values FIXME
-                    .Select(x => {
-                    if (x is PrimitiveIdxStringValue) {
-                        return StringEscape.Escape(x.ToString());
-                    }
-                    return x.ToString();
-                });
-                string tagType = items.Prefix.TagType switch {
+                string mapped;
+                if (items.Items is PrimitiveIdxStringValue) {
+                    mapped = StringEscape.Escape(items.Items.ToString());
+                } else {
+                    mapped = items.Items.ToString();
+                }
+                string tagType = items.TagType switch {
                     HbcDataBufferTagType.ByteString or HbcDataBufferTagType.ShortString or HbcDataBufferTagType.LongString => "String",
-                    _ => items.Prefix.TagType.ToString()
+                    _ => items.TagType.ToString()
                 };
-                string joined = string.Join(", ", mapped);
-                builder.AppendLine($".data {prefix}{i} {tagType}[] {{ {joined} }}");
+                builder.AppendLine($".data {prefix}{i} Off:{items.Offset} {tagType}[] {mapped}");
             }
             if (buffer.Count > 0) {
                 builder.AppendLine();
