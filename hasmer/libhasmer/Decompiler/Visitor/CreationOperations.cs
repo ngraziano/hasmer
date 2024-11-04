@@ -61,8 +61,8 @@ namespace Hasmer.Decompiler.Visitor {
             context.State.Variables[resultRegister] = "obj" + resultRegister;
             context.State.Registers[resultRegister] = new Identifier(context.State.Variables[resultRegister]);
 
-            var keys = DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.KeyBuffer, keyBufferIndex, itemsCount);
-            var values = DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.ValueBuffer, valueBufferIndex, itemsCount);
+            var keys = context.Source.ObjectKeyBuffer.GetElementSerie(keyBufferIndex, itemsCount);
+            var values = context.Source.ObjectValueBuffer.GetElementSerie(valueBufferIndex, itemsCount);
 
             ObjectExpression obj = new ObjectExpression {
                 Properties = new List<ObjectExpressionProperty>(itemsCount)
@@ -104,7 +104,7 @@ namespace Hasmer.Decompiler.Visitor {
             context.State.Variables[resultRegister] = "arr" + resultRegister;
             context.State.Registers[resultRegister] = new Identifier(context.State.Variables[resultRegister]);
 
-            var items = DataDisassembler.GetElementSeries(context.Decompiler.DataDisassembler.ArrayBuffer, arrayBufferIndex, itemsCount);
+            var items = context.Source.ArrayBuffer.GetElementSerie(arrayBufferIndex, itemsCount);
 
             var arr = new ArrayExpression {
                 Elements = items.Select(item => new Literal(item)).Cast<SyntaxNode>().ToList()

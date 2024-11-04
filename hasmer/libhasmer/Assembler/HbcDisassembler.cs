@@ -47,8 +47,7 @@ namespace Hasmer.Assembler {
                 builder.AppendLine(" auto");
             }
 
-            builder.AppendLine();
-            builder.AppendLine(DataDisassembler.Disassemble());
+         
 
             Console.Write("Disassembling functions... ");
             using (ConsoleProgressBar progress = new ConsoleProgressBar()) {
@@ -61,6 +60,10 @@ namespace Hasmer.Assembler {
                     builder.AppendLine();
                 }
             }
+            Console.Write("Disassembling data... ");
+
+            builder.AppendLine();
+            builder.AppendLine(DataDisassembler.Disassemble());
             Console.WriteLine("done!");
 
             return builder.ToString();

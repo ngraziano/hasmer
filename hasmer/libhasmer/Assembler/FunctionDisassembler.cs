@@ -146,26 +146,23 @@ namespace Hasmer.Assembler {
         /// <summary>
         /// Annotates an instruction that refers to the array buffer.
         /// </summary>
-        private string AnnotateArray(uint arrayBufferIndex) {
-            return $"Array Buffer Index = {arrayBufferIndex}, .data {DisassembleArray(arrayBufferIndex)}";
+        private string AnnotateArray(uint arrayBufferOffset, uint arrayBufferLengh) {
+            var data = Source.ArrayBuffer.GetElementSerie(arrayBufferOffset, arrayBufferLengh);
+            var values = "[" + string.Join(", ", data.Select(d=>d.ToAsmString())) + "]";
+            return $"Array Buffer Offset = {arrayBufferOffset}, .data {DisassembleArray(arrayBufferOffset)}  {values}";
         }
 
         /// <summary>
         /// Returns the label-name of an item in the array buffer.
         /// </summary>
         private string DisassembleArray(uint arrayBufferIndex) {
-            HbcDataBufferItems items = Disassembler.DataDisassembler.ArrayBuffer.Reverse<HbcDataBufferItems>().First(x => x.Offset <= arrayBufferIndex);
-            int disasmIndex = Disassembler.DataDisassembler.ArrayBuffer.IndexOf(items);
-            uint addedOffset = arrayBufferIndex - items.Offset;
-            if (addedOffset != 0) {
-                return $"A{disasmIndex}+{addedOffset}";
-            }
-            return $"A{disasmIndex}";
+            
+            return $"A{arrayBufferIndex}";
         }
 
         private string AnnotateObject(uint keyBufferIndex, uint valueBufferIndex, ushort length) {
-            var keys = DataDisassembler.GetElementSeries(Disassembler.DataDisassembler.KeyBuffer, keyBufferIndex, length);
-            var values = DataDisassembler.GetElementSeries(Disassembler.DataDisassembler.ValueBuffer, valueBufferIndex, length);
+            var keys = Source.ObjectKeyBuffer.GetElementSerie(keyBufferIndex, length);
+            var values = Source.ObjectValueBuffer.GetElementSerie(valueBufferIndex, length);
 
             Debug.Assert(keys.Count == values.Count, "Invalid number of value received");
 
@@ -200,8 +197,8 @@ namespace Hasmer.Assembler {
             string annotation = Source.BytecodeFormat.Definitions[insn.Opcode].Name switch {
                 "CreateClosure" => AnnotateClosure(insn.Operands[2].GetValue<ushort>()),
                 "CreateClosureLongIndex" => AnnotateClosure(insn.Operands[2].GetValue<uint>()),
-                "NewArrayWithBuffer" => AnnotateArray(insn.Operands[3].GetValue<ushort>()),
-                "NewArrayWithBufferLong" => AnnotateArray(insn.Operands[3].GetValue<uint>()),
+                "NewArrayWithBuffer" => AnnotateArray(insn.Operands[3].GetValue<ushort>(), insn.Operands[2].GetValue<ushort>()),
+                "NewArrayWithBufferLong" => AnnotateArray(insn.Operands[3].GetValue<uint>(), insn.Operands[2].GetValue<ushort>()),
                 // "NewObjectWithBuffer" => AnnotateObject(insn.Operands[3].GetValue<ushort>(), insn.Operands[4].GetValue<ushort>(), insn.Operands[2].GetValue<ushort>()),
                 // "NewObjectWithBufferLong" => AnnotateObject(insn.Operands[3].GetValue<uint>(), insn.Operands[4].GetValue<uint>(), insn.Operands[2].GetValue<ushort>()),
                 _ => null

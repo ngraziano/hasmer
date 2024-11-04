@@ -15,21 +15,6 @@ namespace Hasmer.Assembler {
         public HbcFile Source { get; set; }
 
         /// <summary>
-        /// The decoded Array Buffer.
-        /// </summary>
-        public List<HbcDataBufferItems> ArrayBuffer { get; set; }
-
-        /// <summary>
-        /// The decoded Object Key Buffer.
-        /// </summary>
-        public List<HbcDataBufferItems> KeyBuffer { get; set; }
-
-        /// <summary>
-        /// The decoded Object Value Buffer.
-        /// </summary>
-        public List<HbcDataBufferItems> ValueBuffer { get; set; }
-
-        /// <summary>
         /// Creates a new DataDisassembler for a given Hermes bytecode file.
         /// </summary>
         public DataDisassembler(HbcFile source) {
@@ -43,14 +28,14 @@ namespace Hasmer.Assembler {
         /// This enables reading over multiple entries at once.
         /// </summary>
         public static List<PrimitiveValue> GetElementSeries(List<HbcDataBufferItems> buffer, uint offset, int length) {
-            var series = new List<PrimitiveValue>(length);
             var idx = buffer.FindIndex(item => item.Offset == offset);
-            if (idx < 0) throw new IndexOutOfRangeException("Offset invalid");
-
-            for (int i = 0; i < length; i++) {
-                series.Add(buffer[idx + i].Items);
+            if (idx < 0) {
+                Console.WriteLine($"WARN :Offset {offset} not found in buffer.");
+                return [];
+                //throw new IndexOutOfRangeException("Offset invalid");
             }
-            return series;
+
+            return buffer.Skip(idx).Take(length).Select(i => i.Items).ToList();
         }
 
         /// <summary>
@@ -85,14 +70,7 @@ namespace Hasmer.Assembler {
             }
         }
 
-        public void DisassembleData() {
-            Console.WriteLine("Parsing array buffer...");
-            ArrayBuffer = Source.ArrayBuffer.ReadAll(Source);
-            Console.WriteLine("Parsing object key buffer...");
-            KeyBuffer = Source.ObjectKeyBuffer.ReadAll(Source);
-            Console.WriteLine("Parsing object value buffer...");
-            ValueBuffer = Source.ObjectValueBuffer.ReadAll(Source);
-        }
+
 
         /// <summary>
         /// Disassembles the Hermes bytecode data buffers and returns a string representing the disassembly.
@@ -100,10 +78,10 @@ namespace Hasmer.Assembler {
         public string Disassemble() {
             StringBuilder builder = new StringBuilder();
 
-            DisassembleData();
-            AppendDisassembly(builder, ArrayBuffer, 'A');
-            AppendDisassembly(builder, KeyBuffer, 'K');
-            AppendDisassembly(builder, ValueBuffer, 'V');
+         
+            //AppendDisassembly(builder, ArrayBuffer, 'A');
+            //AppendDisassembly(builder, KeyBuffer, 'K');
+            //AppendDisassembly(builder, ValueBuffer, 'V');
 
             return builder.ToString();
         }

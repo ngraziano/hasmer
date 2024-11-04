@@ -42,7 +42,6 @@ namespace Hasmer.Decompiler {
         /// Decompiles the bytecode file into either a JSON AST or JavaScript source code.
         /// </summary>
         public string Decompile(bool preserveAst) {
-            DataDisassembler.DisassembleData();
 
             ProgramDefinition root = new ProgramDefinition();
 

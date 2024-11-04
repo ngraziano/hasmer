@@ -204,13 +204,13 @@ namespace Hasmer {
                 BigIntStorage = ReadGenericTable(reader, BigIntTable, bigIntCount, Header.BigIntStorageSize.Value);
             }
 
-            ArrayBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ArrayBufferSize));
+            ArrayBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ArrayBufferSize), this);
             reader.Align();
 
-            ObjectKeyBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ObjKeyBufferSize));
+            ObjectKeyBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ObjKeyBufferSize), this);
             reader.Align();
 
-            ObjectValueBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ObjValueBufferSize));
+            ObjectValueBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ObjValueBufferSize), this);
             reader.Align();
 
             RegExpTable = new HbcGenericTableEntry[Header.RegExpCount];
@@ -422,8 +422,7 @@ namespace Hasmer {
 
         public StringTableEntry GetStringTableEntry(int index) {
             if (index < 0 || index >= StringTable.Length) {
-                return new StringTableEntry(StringKind.Literal, "out of bounds string index: " + index, false);
-                // throw new Exception("out of bounds string index: " + index);
+                throw new Exception("out of bounds string index: " + index);
             }
             return StringTable[index];
         }

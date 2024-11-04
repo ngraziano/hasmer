@@ -24,6 +24,8 @@ namespace Hasmer {
         /// It is the duty of the caller to ensure that the type actually is of type T before calling.
         /// </summary>
         public abstract T GetValue<T>();
+
+        public abstract string ToAsmString();
     }
 
     public class PrimitiveIdxStringValue : PrimitiveValue {
@@ -55,6 +57,8 @@ namespace Hasmer {
         }
 
         public override string ToString() => (string)RawValue;
+
+        public override string ToAsmString() => StringEscape.Escape(source.GetStringTableEntry(idx).Value);
     }
 
     public class PrimitiveNumberValue : PrimitiveValue {
@@ -85,6 +89,8 @@ namespace Hasmer {
             }
             return typedValue.Equals(obj);
         }
+
+        public override string ToAsmString() => ToString();
     }
 
     public class PrimitiveIntegerValue : PrimitiveValue {
@@ -110,6 +116,8 @@ namespace Hasmer {
             }
             return typedValue.Equals(obj);
         }
+
+        public override string ToAsmString() => ToString();
     }
 
     public class PrimitiveNullValue : PrimitiveValue {
@@ -134,6 +142,8 @@ namespace Hasmer {
             }
             return obj is null;
         }
+
+        public override string ToAsmString() => "null";
     }
 
     public class PrimitiveBoolValue : PrimitiveValue {
@@ -161,5 +171,7 @@ namespace Hasmer {
             }
             return typedValue.Equals(obj);
         }
+        
+        public override string ToAsmString() => ToString();
     }
 }

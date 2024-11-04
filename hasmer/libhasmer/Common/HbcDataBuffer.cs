@@ -57,6 +57,8 @@ namespace Hasmer {
     /// Represents a Hermes data buffer, such as the array buffer.
     /// </summary>
     public class HbcDataBuffer {
+        private readonly HbcFile source;
+
         /// <summary>
         /// The raw binary of the buffer.
         /// </summary>
@@ -65,8 +67,9 @@ namespace Hasmer {
         /// <summary>
         /// Creates a new HbcDataBuffer given the raw binary data in the buffer.
         /// </summary>
-        public HbcDataBuffer(byte[] buffer) {
+        public HbcDataBuffer(byte[] buffer, HbcFile source) {
             Buffer = buffer;
+            this.source = source;
         }
 
         /// <summary>
@@ -94,7 +97,7 @@ namespace Hasmer {
                         Console.WriteLine("Warn trying to read beyond end");
                     }
                     // Console.WriteLine("  Read value: " + values[i].ToString());
-                  
+
                 }
 
             }
@@ -117,9 +120,9 @@ namespace Hasmer {
         private PrimitiveValue ReadValue(HbcFile source, HbcDataBufferTagType tagType, BinaryReader reader) {
             // new PrimitiveValue made for each switch to preserve the PrimitiveValue type tagging mechanism for numbers
             return tagType switch {
-                HbcDataBufferTagType.ByteString => new PrimitiveIdxStringValue(reader.ReadByte(),source),
-                HbcDataBufferTagType.ShortString => new PrimitiveIdxStringValue(reader.ReadUInt16(),source),
-                HbcDataBufferTagType.LongString => new PrimitiveIdxStringValue((int)reader.ReadUInt32(),source),
+                HbcDataBufferTagType.ByteString => new PrimitiveIdxStringValue(reader.ReadByte(), source),
+                HbcDataBufferTagType.ShortString => new PrimitiveIdxStringValue(reader.ReadUInt16(), source),
+                HbcDataBufferTagType.LongString => new PrimitiveIdxStringValue((int)reader.ReadUInt32(), source),
                 HbcDataBufferTagType.Number => new PrimitiveNumberValue(reader.ReadDouble()),
                 HbcDataBufferTagType.Integer => new PrimitiveIntegerValue(reader.ReadInt32()),
                 HbcDataBufferTagType.Null => new PrimitiveNullValue(),
@@ -147,6 +150,27 @@ namespace Hasmer {
                 TagType = (HbcDataBufferTagType)(keyTag & TAG_MASK),
                 Length = (uint)(keyTag & 0x0F)
             };
+        }
+
+
+        public List<PrimitiveValue> GetElementSerie(long arrayBufferOffset, long arrayBufferLengh) {
+            using var ms = new MemoryStream(Buffer);
+            using var reader = new BinaryReader(ms);
+            ms.Position = arrayBufferOffset;
+
+            var result = new List<PrimitiveValue>();
+
+            // List can be on multiple array entry
+            while (result.Count < arrayBufferLengh) {
+                var prefix = ReadTagType(reader);
+                for (int i = 0; result.Count < arrayBufferLengh && i < prefix.Length && ms.Position < ms.Length; i++) {
+                    var value = ReadValue(source, prefix.TagType, reader);
+                    result.Add(value);
+
+                }
+            }
+
+            return result;
         }
     }
 }
