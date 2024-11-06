@@ -35,7 +35,7 @@ namespace Hasmer.Assembler {
                 //throw new IndexOutOfRangeException("Offset invalid");
             }
 
-            return buffer.Skip(idx).Take(length).Select(i => i.Items).ToList();
+            return buffer.Skip(idx).Take(length).Select(i => i.Item).ToList();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Hasmer.Assembler {
                     HbcDataBufferTagType.ByteString or HbcDataBufferTagType.ShortString or HbcDataBufferTagType.LongString => "String",
                     _ => items.TagType.ToString()
                 };
-                builder.AppendLine($".data {prefix}{i} Off:{items.Offset} {tagType}[] {items.Items.ToAsmString()}");
+                builder.AppendLine($".data {prefix}{i} Off:{items.Offset} {tagType}[] {items.Item.ToAsmString()}");
             }
             if (buffer.Count > 0) {
                 builder.AppendLine();

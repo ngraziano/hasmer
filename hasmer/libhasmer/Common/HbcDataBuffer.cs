@@ -34,7 +34,7 @@ namespace Hasmer {
         public HbcDataBufferTagType TagType { get; set; }
 
         public override string ToString() {
-            return $"{TagType.ToString()} x {Length}";
+            return $"{TagType} x {Length}";
         }
     }
 
@@ -46,7 +46,7 @@ namespace Hasmer {
         /// <summary>
         /// The items for the data buffer entry.
         /// </summary>
-        public required PrimitiveValue Items { get; set; }
+        public required PrimitiveValue Item { get; set; }
         /// <summary>
         /// The offset of the entry (from the start of the header) relative to the start of the entire buffer.
         /// </summary>
@@ -73,46 +73,11 @@ namespace Hasmer {
         }
 
         /// <summary>
-        /// Reads the entire buffer and disassembles it into HbcDataBufferItems objects for each entry in the buffer.
-        /// </summary>
-        public List<HbcDataBufferItems> ReadAll(HbcFile source) {
-            using var ms = new MemoryStream(Buffer);
-            using var reader = new BinaryReader(ms);
-
-            var itemsList = new List<HbcDataBufferItems>();
-            while (ms.Position < ms.Length) {
-                uint offset = (uint)ms.Position;
-                HbcDataBufferPrefix prefix = ReadTagType(reader);
-                // Console.WriteLine("  prefix: " + prefix.ToString());
-                for (int i = 0; i < prefix.Length && ms.Position < ms.Length; i++) {
-                    try {
-                        var value = ReadValue(source, prefix.TagType, reader);
-                        itemsList.Add(new HbcDataBufferItems {
-                            TagType = prefix.TagType,
-                            Items = value,
-                            Offset = offset
-                        });
-                        offset = (uint)ms.Position;
-                    } catch (EndOfStreamException) {
-                        Console.WriteLine("Warn trying to read beyond end");
-                    }
-                    // Console.WriteLine("  Read value: " + values[i].ToString());
-
-                }
-
-            }
-
-            return itemsList;
-        }
-
-        /// <summary>
         /// Writes the serialized buffer to a stream.
         /// </summary>
         public void WriteAll(BinaryWriter writer) {
             writer.Write(Buffer);
         }
-
-
 
         /// <summary>
         /// Reads a single PrimitiveValue from a stream given the type of the value.
@@ -135,7 +100,7 @@ namespace Hasmer {
         /// <summary>
         /// Reads the tag type (and length) for an entry in the data buffer. All subsequent items will have that type.
         /// </summary>
-        private HbcDataBufferPrefix ReadTagType(BinaryReader reader) {
+        private static HbcDataBufferPrefix ReadTagType(BinaryReader reader) {
             const byte TAG_MASK = 0x70;
 
             // if the length of the data is longer than 0x0F, an additional length byte is written

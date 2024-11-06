@@ -193,7 +193,7 @@ namespace Hasmer.Assembler {
         /// <summary>
         /// Adds a comment to an instruction if neccessary.
         /// </summary>
-        private void AnnotateInstruction(SourceCodeBuilder builder, HbcInstruction insn) {
+        private string? AnnotateInstruction(HbcInstruction insn) {
             string? annotation = Source.BytecodeFormat.Definitions[insn.Opcode].Name switch {
                 "CreateClosure" => AnnotateClosure(insn.Operands[2].GetValue<ushort>()),
                 "CreateClosureLongIndex" => AnnotateClosure(insn.Operands[2].GetValue<uint>()),
@@ -203,11 +203,8 @@ namespace Hasmer.Assembler {
                 // "NewObjectWithBufferLong" => AnnotateObject(insn.Operands[3].GetValue<uint>(), insn.Operands[4].GetValue<uint>(), insn.Operands[2].GetValue<ushort>()),
                 _ => null
             };
+            return annotation;
 
-            if (annotation != null) {
-                builder.Write("// ");
-                builder.Write(annotation);
-            }
         }
 
         /// <summary>
@@ -318,14 +315,21 @@ namespace Hasmer.Assembler {
                 int annotationPadding = Math.Max(1, ANNOTATION_OFFSET - operationLength);
                 builder.Write(new string(' ', annotationPadding));
 
+
+                string? annotation = AnnotateInstruction(insn);
                 if (Disassembler.Options.IsVerbose) {
                     AnnotateVerbose(builder, insn);
 
+                    if (annotation is not null)
                     builder.NewLine();
                     builder.Write(new string(' ', operationLength + annotationPadding));
                 }
 
-                AnnotateInstruction(builder, insn);
+                if (annotation is not null) {
+                    builder.Write("// ");
+                    builder.Write(annotation);
+                }
+                
                 builder.NewLine();
             }
 
