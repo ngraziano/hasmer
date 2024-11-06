@@ -1,4 +1,5 @@
 ﻿using Hasmer.Decompiler.AST;
+using System;
 
 namespace Hasmer.Decompiler.Analysis {
     /// <summary>
@@ -23,10 +24,10 @@ namespace Hasmer.Decompiler.Analysis {
         /// </code>
         /// </summary>
         private static void OptimizeObjectDeclarations(BlockStatement block) {
-            ObjectExpression currentObject = null;
-            Identifier currentObjectName = null;
+            ObjectExpression? currentObject = null;
+            Identifier? currentObjectName = null;
 
-            SyntaxNode node = block.Body[0];
+            SyntaxNode? node = block.Body[0];
             while ((node = node.Next) != null) {
                 if (node is AssignmentExpression assn && assn.Operator == "=") {
                     if (assn.Right is ObjectExpression expr && assn.Left is Identifier objName) {
@@ -36,7 +37,7 @@ namespace Hasmer.Decompiler.Analysis {
                           assn.Left is MemberExpression memberExpr &&
                           memberExpr.Object is Identifier objIndent &&
                           !objIndent.IsRedundant &&
-                          objIndent.Name == currentObjectName.Name) {
+                          objIndent.Name == currentObjectName?.Name) {
                         currentObject.Properties.Add(new ObjectExpressionProperty {
                             Key = memberExpr.Property,
                             Value = assn.Right

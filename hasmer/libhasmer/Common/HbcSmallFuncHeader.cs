@@ -14,7 +14,7 @@ namespace Hasmer {
     /// cannot be included within the bounds of a SmallFuncHeader, this object includes a pointer to the full header as well.
     /// </summary>
     public class HbcSmallFuncHeader : HbcFuncHeader {
-        public HbcFuncHeader Large { get; set; }
+        public HbcFuncHeader? Large { get; set; }
 
         public override HbcFuncHeader GetAssemblerHeader() {
             return Large ?? this;

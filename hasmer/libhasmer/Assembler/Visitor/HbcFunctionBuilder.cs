@@ -23,7 +23,7 @@ namespace Hasmer.Assembler.Visitor {
         /// <summary>
         /// The declared name of the function.
         /// </summary>
-        public string FunctionName { get; set; }
+        public required string FunctionName { get; set; }
 
         /// <summary>
         /// The amount of registers that the function has.
@@ -43,6 +43,6 @@ namespace Hasmer.Assembler.Visitor {
         /// <summary>
         /// The tokens of the instructions contained in the body of the function.
         /// </summary>
-        public List<HasmInstructionToken> Instructions { get; set; }
+        public required List<HasmInstructionToken> Instructions { get; set; }
     }
 }

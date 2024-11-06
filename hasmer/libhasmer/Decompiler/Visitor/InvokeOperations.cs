@@ -98,7 +98,9 @@ namespace Hasmer.Decompiler.Visitor {
             List<SyntaxNode> arguments = new List<SyntaxNode>((int)argumentsCount);
             for (uint i = highestUsedRegister; i > highestUsedRegister - argumentsCount; i--) {
                 context.State.Registers.MarkUsage(i);
-                arguments.Add(context.State.Registers[i]);
+                var arg = context.State.Registers[i];
+                if(arg is null) throw new InvalidOperationException("Argument register is null");
+                arguments.Add(arg);
             }
 
             if (construct && context.Decompiler.Options.OmitPrototypeFromConstructorInvocation) {

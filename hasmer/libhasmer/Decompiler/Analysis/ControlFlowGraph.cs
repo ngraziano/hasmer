@@ -90,8 +90,10 @@ namespace Hasmer.Decompiler.Analysis {
         /// Returns the control flow block whose <see cref="ControlFlowBlock.BaseOffset"/> is exactly equal to the given offset,
         /// or `null` if there is no block which starts at the offset.
         /// </summary>
-        public ControlFlowBlock GetBlockAtOffset(uint offset) {
-            return CachedBlocks.GetValueOrDefault(offset, null);
+        public ControlFlowBlock? GetBlockAtOffset(uint offset) {
+            if (CachedBlocks is null)
+                throw new InvalidOperationException();
+            return CachedBlocks.GetValueOrDefault(offset);
         }
 
         /// <summary>

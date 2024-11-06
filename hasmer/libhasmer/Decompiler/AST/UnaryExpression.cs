@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Hasmer.Decompiler.AST {
     public class UnaryExpression : SyntaxNode {
-        public string Operator { get; set; }
-        public SyntaxNode Argument { get; set; }
+        public required string Operator { get; set; }
+        public required SyntaxNode Argument { get; set; }
 
         public override void WriteDirect(SourceCodeBuilder builder) {
             builder.Write(Operator);

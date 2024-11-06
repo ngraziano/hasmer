@@ -13,7 +13,7 @@ namespace Hasmer.Assembler.Parser {
             return asm.Stream.Peek(2) == "//";
         }
 
-        public HasmToken Parse(HasmReaderState asm) {
+        public HasmToken? Parse(HasmReaderState asm) {
             if (!CanParse(asm)) {
                 throw new HasmParserException(asm.Stream, "invalid comment");
             }

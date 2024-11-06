@@ -18,7 +18,7 @@ namespace Hasmer {
         /// instead of accessing this property directly.
         /// Use with caution.
         /// </summary>
-        public PrimitiveValue Value { get; set; }
+        public required PrimitiveValue Value { get; set; }
 
         /// <summary>
         /// Writes the operand to a stream of binary data.

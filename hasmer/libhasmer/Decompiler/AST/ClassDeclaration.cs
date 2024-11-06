@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Hasmer.Decompiler.AST {
     public class ClassDeclaration : SyntaxNode {
-        public Identifier Name { get; set; }
-        public Identifier SuperClass { get; set; }
+        public required Identifier Name { get; set; }
+        public Identifier? SuperClass { get; set; }
         public List<MethodDefinition> Body { get; set; }
 
         public ClassDeclaration() {

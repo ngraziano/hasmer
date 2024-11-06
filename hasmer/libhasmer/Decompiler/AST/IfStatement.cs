@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Hasmer.Decompiler.AST {
     public class IfStatement : SyntaxNode {
-        public SyntaxNode Test { get; set; }
-        public SyntaxNode Consequent { get; set; }
-        public SyntaxNode Alternate { get; set; }
+        public required SyntaxNode Test { get; set; }
+        public required SyntaxNode Consequent { get; set; }
+        public SyntaxNode? Alternate { get; set; }
 
         public override void WriteDirect(SourceCodeBuilder builder) {
             if (Alternate != null && Consequent is not BlockStatement && Alternate is not BlockStatement) {

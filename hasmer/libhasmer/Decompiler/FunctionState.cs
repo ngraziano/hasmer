@@ -50,12 +50,13 @@ namespace Hasmer.Decompiler {
         public void DebugPrint() {
             for (int i = 0; i < Registers.Length; i++) {
                 Console.Write($"Register {i}: ");
-                if (Registers[i] == null) {
+                var reg = Registers[i];
+                if (reg == null) {
                     Console.WriteLine("empty");
                 } else {
                     SourceCodeBuilder builder = new SourceCodeBuilder("    ");
-                    builder.Write($"[{Registers[i].GetType().Name}] ");
-                    Registers[i].Write(builder);
+                    builder.Write($"[{reg.GetType().Name}] ");
+                    reg.Write(builder);
                     Console.WriteLine(builder.ToString());
                 }
                 Console.WriteLine($"Variable {i}: {Variables[i]}");

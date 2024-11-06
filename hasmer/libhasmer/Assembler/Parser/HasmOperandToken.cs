@@ -23,7 +23,7 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The value represented by the operand.
         /// </summary>
-        public PrimitiveValue Value { get; set; }
+        public required PrimitiveValue Value { get; set; }
 
         public HasmOperandToken(HasmStringStreamState? state) : base(state) { }
     }

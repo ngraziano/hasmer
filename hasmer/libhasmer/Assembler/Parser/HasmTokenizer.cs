@@ -13,16 +13,16 @@ namespace Hasmer.Assembler.Parser {
 
     public class TokenDefinition {
         [JsonProperty]
-        public string Kind { get; set; }
+        public required string Kind { get; set; }
 
         [JsonProperty]
-        public dynamic Match { get; set; }
+        public required object Match { get; set; }
 
         [JsonProperty]
-        public string Var { get; set; }
+        public string? Var { get; set; }
 
         [JsonProperty]
-        public string Modifier { get; set; }
+        public string? Modifier { get; set; }
 
         [JsonProperty]
         public bool Repeated { get; set; }
@@ -32,19 +32,17 @@ namespace Hasmer.Assembler.Parser {
     }
 
     public class TokenizerState {
-        public HasmStringStream Stream { get; set; }
+        public required HasmStringStream Stream { get; set; }
 
-        public Dictionary<string, List<TokenMatch>> Vars { get; set; }
+        public required Dictionary<string, List<TokenMatch>> Vars { get; set; }
         public bool Moved { get; set; }
         public HasmStringStreamWhitespaceMode WhitespaceMode { get; set; }
 
         public void AddVar(string name, TokenMatch token) {
-            if (Vars.TryGetValue(name, out List<TokenMatch> l)) {
+            if (Vars.TryGetValue(name, out List<TokenMatch>? l)) {
                 l.Add(token);
             } else {
-                l = new List<TokenMatch>(1);
-                l.Add(token);
-                Vars[name] = l;
+                Vars[name] = [token];
             }
         }
 
@@ -170,7 +168,7 @@ namespace Hasmer.Assembler.Parser {
                 _ => throw new HasmParserException(kind, "invalid label type; expecting 'A', 'K', 'V', or 'L'")
             };
             HasmIntegerToken index = vars["index"][0].AsInteger();
-            HasmIntegerToken offset = null;
+            HasmIntegerToken? offset = null;
             if (vars.ContainsKey("offset")) {
                 offset = vars["offset"][0].AsInteger();
             }
@@ -375,8 +373,6 @@ namespace Hasmer.Assembler.Parser {
             }
         }
 
-        int offset = 0;
-
         private Tokenizer CreateCapturingParser(TokenDefinition def) {
             Tokenizer inner = CreateSimpleParser(def);
             return state => {
@@ -395,7 +391,7 @@ namespace Hasmer.Assembler.Parser {
                     return state => {
                         HasmStringStreamState sss = state.Stream.SaveState();
 
-                        string take = state.Stream.AdvanceCharacters(match.Length);
+                        string? take = state.Stream.AdvanceCharacters(match.Length);
                         if (take == null) {
                             return TokenizerResult.Failed;
                         }
@@ -409,7 +405,7 @@ namespace Hasmer.Assembler.Parser {
                     };
                 case "string":
                     return state => {
-                        HasmToken token = ParseStringLike(state);
+                        HasmToken? token = ParseStringLike(state);
                         if (token is HasmStringToken) {
                             return TokenizerResult.Matched(token);
                         } else {
@@ -418,7 +414,7 @@ namespace Hasmer.Assembler.Parser {
                     };
                 case "ident":
                     return state => {
-                        HasmToken token = ParseStringLike(state);
+                        HasmToken? token = ParseStringLike(state);
                         if (token is HasmIdentifierToken) {
                             return TokenizerResult.Matched(token);
                         } else {
@@ -429,7 +425,7 @@ namespace Hasmer.Assembler.Parser {
                     return state => {
                         HasmStringStreamState sss = state.Stream.SaveState();
 
-                        string take = state.Stream.AdvanceWord();
+                        string? take = state.Stream.AdvanceWord();
                         if (take == null) {
                             return TokenizerResult.Failed;
                         }
@@ -452,7 +448,7 @@ namespace Hasmer.Assembler.Parser {
                             return TokenizerResult.Failed;
                         }
 
-                        string word = state.Stream.AdvanceWord();
+                        string? word = state.Stream.AdvanceWord();
                         if (word == null) {
                             return TokenizerResult.Failed;
                         }
@@ -474,7 +470,7 @@ namespace Hasmer.Assembler.Parser {
                             return TokenizerResult.Failed;
                         }
 
-                        string intPart = state.Stream.AdvanceWord();
+                        string? intPart = state.Stream.AdvanceWord();
                         if (intPart == null) {
                             return TokenizerResult.Failed;
                         }
@@ -482,7 +478,7 @@ namespace Hasmer.Assembler.Parser {
                         HasmNumberToken token;
                         if (separator == '.') { // separator == ".", it's a fraction
                             state.Stream.AdvanceOperator();
-                            string fractionPart = state.Stream.AdvanceWord();
+                            string? fractionPart = state.Stream.AdvanceWord();
                             if (fractionPart == null) {
                                 return TokenizerResult.Failed;
                             }
@@ -509,13 +505,13 @@ namespace Hasmer.Assembler.Parser {
                     };
                 case "enum":
                     JArray matchArr = (JArray)def.Match;
-                    IEnumerable<string> values = matchArr.Values<string>();
+                    IEnumerable<string> values = matchArr.Values<string>()!;
                     return state => {
                         HasmStringStreamState sss = state.Stream.SaveState();
                         foreach (string value in values) {
                             state.Stream.LoadState(sss);
 
-                            string take = state.Stream.AdvanceCharacters(value.Length);
+                            string? take = state.Stream.AdvanceCharacters(value.Length);
                             if (take == null) {
                                 continue;
                             }
@@ -531,7 +527,7 @@ namespace Hasmer.Assembler.Parser {
                     };
                 case "or":
                     JArray matches = (JArray)def.Match;
-                    IEnumerable<Tokenizer> tokenizers = matches.ToObject<List<TokenDefinition>>().Select(CreateFullParser);
+                    IEnumerable<Tokenizer> tokenizers = matches.ToObject<List<TokenDefinition>>()!.Select(CreateFullParser);
                     return state => {
                         HasmStringStreamState sss = state.Stream.SaveState();
                         foreach (Tokenizer tokenizer in tokenizers) {
@@ -564,7 +560,7 @@ namespace Hasmer.Assembler.Parser {
                     }
 
                     if (def.Match is JArray matchArray) {
-                        List<TokenDefinition> tokens = matchArray.ToObject<List<TokenDefinition>>();
+                        List<TokenDefinition> tokens = matchArray.ToObject<List<TokenDefinition>>()!;
                         return CreateMultiTokenParser(tokens.Select(CreateFullParser).ToList());
                     }
 
@@ -594,7 +590,7 @@ namespace Hasmer.Assembler.Parser {
             }
         }
 
-        private static HasmLiteralToken ParseStringLike(TokenizerState state) {
+        private static HasmLiteralToken? ParseStringLike(TokenizerState state) {
             HasmStringStreamWhitespaceMode prevMode = state.Stream.WhitespaceMode;
             state.Stream.WhitespaceMode = HasmStringStreamWhitespaceMode.Keep;
 
@@ -634,7 +630,7 @@ namespace Hasmer.Assembler.Parser {
                             case 't': m = '\t'; break;
                             case 'v': m = '\v'; break;
                             case 'u':
-                                string hex = state.Stream.AdvanceCharacters(4);
+                                string? hex = state.Stream.AdvanceCharacters(4);
                                 if (hex == null) {
                                     state.Stream.WhitespaceMode = prevMode;
                                     return null;

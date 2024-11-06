@@ -12,7 +12,7 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The simple value.
         /// </summary>
-        public string Value { get; set; }
+        public required string Value { get; set; }
 
         public HasmSimpleToken(HasmStringStreamState state) : base(state) { }
     }

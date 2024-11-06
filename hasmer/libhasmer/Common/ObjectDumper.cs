@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
@@ -26,31 +27,38 @@ namespace Hasmer {
             return instance.DumpElement(element);
         }
 
-        private string DumpElement(object element) {
+        private string DumpElement(object? element) {
             if (element == null || element is ValueType || element is string) {
                 Write(FormatValue(element));
-            } else {
+            } else if (element is IEnumerable enumerableElement) {
                 Type objectType = element.GetType();
-                IEnumerable enumerableElement = element as IEnumerable;
 
                 if (enumerableElement == null) {
-                    Write("{{{0}}}", objectType.FullName);
+                    Write("{{{0}}}", objectType.FullName!);
                     FoundElements.Add(element.GetHashCode());
                     Level++;
 
                     MemberInfo[] members = element.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                     foreach (MemberInfo memberInfo in members) {
-                        FieldInfo fieldInfo = memberInfo as FieldInfo;
-                        PropertyInfo propertyInfo = memberInfo as PropertyInfo;
+                        FieldInfo? fieldInfo = (memberInfo as FieldInfo);
+                        PropertyInfo? propertyInfo = memberInfo as PropertyInfo;
 
-                        if (fieldInfo == null && propertyInfo == null) {
-                            continue;
+                        Type type;
+                        object? value;
+                        if (fieldInfo is null)
+                            { 
+                            if (propertyInfo is null) {
+                                continue;
+                                
+                            }else {
+                                type = propertyInfo.PropertyType;
+                                value = propertyInfo.GetValue(element, null);
+                            }
+                        } else {
+                            type = fieldInfo.FieldType;
+                            value= fieldInfo.GetValue(element);
                         }
 
-                        Type type = fieldInfo != null ? fieldInfo.FieldType : propertyInfo.PropertyType;
-                        object value = fieldInfo != null
-                                            ? fieldInfo.GetValue(element)
-                                            : propertyInfo.GetValue(element, null);
 
                         if (type.IsValueType || type == typeof(string)) {
                             Write("{0}: {1}", memberInfo.Name, FormatValue(value));
@@ -63,7 +71,7 @@ namespace Hasmer {
                             if (!alreadyTouched) {
                                 DumpElement(value);
                             } else {
-                                Write("{{{0}}} <-- bidirectional reference found", value.GetType().FullName);
+                                Write("{{{0}}} <-- bidirectional reference found", value?.GetType()?.FullName?? "null");
                             }
                             Level--;
                         }
@@ -78,7 +86,7 @@ namespace Hasmer {
                             if (!AlreadyTouched(item)) {
                                 DumpElement(item);
                             } else {
-                                Write("{{{0}}} <-- bidirectional reference found", item.GetType().FullName);
+                                Write("{{{0}}} <-- bidirectional reference found", item.GetType().FullName!);
                             }
                         }
                     }
@@ -86,11 +94,13 @@ namespace Hasmer {
 
                 Level--;
             }
-
+            else {
+                Debug.Assert(false, "Should append");
+            }
             return Builder.ToString();
         }
 
-        private bool AlreadyTouched(object value) {
+        private bool AlreadyTouched(object? value) {
             if (value == null)
                 return false;
 
@@ -114,7 +124,7 @@ namespace Hasmer {
             Builder.AppendLine(value);
         }
 
-        private string FormatValue(object o) {
+        private string FormatValue(object? o) {
             if (o == null) {
                 return "null";
             }
@@ -132,7 +142,7 @@ namespace Hasmer {
             }
 
             if (o is ValueType) {
-                return o.ToString();
+                return o.ToString() ?? "";
             }
 
             if (o is IEnumerable) {

@@ -168,7 +168,7 @@ namespace Hasmer.Assembler {
 
             var obj = new JObject();
             foreach (var (key, value) in keys.Zip(values)) {
-                obj[key.ToString()] = new JValue(value.RawValue);
+                obj[key.ToString()!] = new JValue(value.RawValue);
             }
 
             return obj.ToString(Formatting.None);
@@ -194,7 +194,7 @@ namespace Hasmer.Assembler {
         /// Adds a comment to an instruction if neccessary.
         /// </summary>
         private void AnnotateInstruction(SourceCodeBuilder builder, HbcInstruction insn) {
-            string annotation = Source.BytecodeFormat.Definitions[insn.Opcode].Name switch {
+            string? annotation = Source.BytecodeFormat.Definitions[insn.Opcode].Name switch {
                 "CreateClosure" => AnnotateClosure(insn.Operands[2].GetValue<ushort>()),
                 "CreateClosureLongIndex" => AnnotateClosure(insn.Operands[2].GetValue<uint>()),
                 "NewArrayWithBuffer" => AnnotateArray(insn.Operands[3].GetValue<ushort>(), insn.Operands[2].GetValue<ushort>()),

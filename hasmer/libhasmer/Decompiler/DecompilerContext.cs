@@ -14,7 +14,7 @@ namespace Hasmer.Decompiler {
         /// <summary>
         /// The decompiler for the Hermes bytecode file.
         /// </summary>
-        public HbcDecompiler Decompiler { get; set; }
+        public required HbcDecompiler Decompiler { get; set; }
 
         /// <summary>
         /// The bytecode file containing the function being decompiled.
@@ -24,12 +24,12 @@ namespace Hasmer.Decompiler {
         /// <summary>
         /// The instructions in the current code block being decompiled.
         /// </summary>
-        public List<HbcInstruction> Instructions { get; set; }
+        public required List<HbcInstruction> Instructions { get; set; }
 
         /// <summary>
         /// The state of the function's registers and other information in the current code bock.
         /// </summary>
-        public FunctionState State { get; set; }
+        public FunctionState State { get; }
 
         /// <summary>
         /// The index of the instruction currently being analyzed in the <see cref="Instructions"/> list.
@@ -44,24 +44,24 @@ namespace Hasmer.Decompiler {
         /// <summary>
         /// The current source tree code block that is being analyzed.
         /// </summary>
-        public BlockStatement Block { get; set; }
+        public required BlockStatement Block { get; set; }
 
         /// <summary>
         /// The decompiler context of the parent function,
         /// i.e. if this function is a closure, this will be the decompiler context of the callee.
         /// A parent of null means that the function is at the root.
         /// </summary>
-        public DecompilerContext Parent { get; set; }
+        public required DecompilerContext? Parent { get; set; }
 
         /// <summary>
         /// The header of the function that is being decompiled.
         /// </summary>
-        public HbcFuncHeader Function { get; set; }
+        public required HbcFuncHeader Function { get; set; }
 
         /// <summary>
         /// The control flow graph of the current function that is being decompiled.
         /// </summary>
-        public ControlFlowGraph ControlFlowGraph { get; set; }
+        public required ControlFlowGraph ControlFlowGraph { get; set; }
 
         /// <summary>
         /// Gets the parent context at the given depth.
@@ -74,7 +74,7 @@ namespace Hasmer.Decompiler {
                 throw new IndexOutOfRangeException("depth < 0");
             }
 
-            DecompilerContext parent = this;
+            DecompilerContext? parent = this;
             for (int i = 0; i < depth; i++) {
                 parent = parent.Parent;
                 if (parent == null) {
@@ -90,7 +90,7 @@ namespace Hasmer.Decompiler {
         /// copying the context so that the original context's state is not affected by changes to the copy.
         /// </summary>
         public DecompilerContext DeepCopy() {
-            DecompilerContext copy = new DecompilerContext {
+            DecompilerContext copy = new DecompilerContext((uint)State.Registers.Length) {
                 Decompiler = Decompiler,
                 Instructions = new List<HbcInstruction>(Instructions),
                 Block = Block,
@@ -99,7 +99,6 @@ namespace Hasmer.Decompiler {
                 Function = Function,
                 ControlFlowGraph = ControlFlowGraph,
             };
-            copy.State = new FunctionState(copy, (uint)State.Registers.Length);
 
             Array.Copy(State.Registers.Storage, copy.State.Registers.Storage, State.Registers.Length);
             Array.Copy(State.Registers.RegisterUsages, copy.State.Registers.RegisterUsages, State.Registers.RegisterUsages.Length);
@@ -107,6 +106,10 @@ namespace Hasmer.Decompiler {
             Array.Copy(State.CallExpressions, copy.State.CallExpressions, State.CallExpressions.Length);
 
             return copy;
+        }
+
+        public DecompilerContext(uint nbRegister) {
+            State = new FunctionState(this, nbRegister);
         }
     }
 }

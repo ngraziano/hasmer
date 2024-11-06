@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 namespace Hasmer.Assembler.Visitor {
     /// <summary>
@@ -36,6 +37,8 @@ namespace Hasmer.Assembler.Visitor {
         }
 
         private bool DoesVariantFit(HbcInstructionDefinition concreteVariant, HasmInstructionToken insn) {
+            Debug.Assert(HbcAssembler.File is not null, "Invalid state");
+            Debug.Assert(HbcAssembler.DataAssembler is not null, "Invalid state");
             // Console.WriteLine($"  DoesVariantFit(concreteVariant = {concreteVariant.Name}, insn = {insn.Instruction})");
 
             for (int i = 0; i < concreteVariant.OperandTypes.Count; i++) {
@@ -71,6 +74,8 @@ namespace Hasmer.Assembler.Visitor {
         }
 
         private HbcInstructionDefinition OptimizeInstruction(HbcInstructionDefinition def, HasmInstructionToken insn) {
+            Debug.Assert(HbcAssembler.File is not null, "Invalid state");
+
             if (def.AbstractDefinition == null) {
                 return def;
             }
@@ -95,8 +100,12 @@ namespace Hasmer.Assembler.Visitor {
         }
 
         private void WriteInstruction(BinaryWriter writer, HasmInstructionToken insn) {
+            Debug.Assert(HbcAssembler.File is not null, "Invalid state");
+            Debug.Assert(HbcAssembler.DataAssembler is not null, "Invalid state");
+
+
             string insnName = insn.Instruction;
-            HbcInstructionDefinition def = HbcAssembler.File.BytecodeFormat.Definitions.Find(def => def.Name == insnName);
+            HbcInstructionDefinition? def = HbcAssembler.File.BytecodeFormat.Definitions.Find(def => def.Name == insnName);
             if (def == null) {
                 throw new HasmParserException(insn, $"unknown instruction: {insnName}");
             }
@@ -164,10 +173,15 @@ namespace Hasmer.Assembler.Visitor {
         /// Serializes the instructions of every function to a buffer sequentially.
         /// </summary>
         private byte[] BuildBytecode() {
+            Debug.Assert(HbcAssembler.File is not null, "Invalid state");
+            Debug.Assert(HbcAssembler.DataAssembler is not null, "Invalid state");
+
             using MemoryStream ms = new MemoryStream();
             using BinaryWriter writer = new BinaryWriter(ms);
 
             HbcFile file = HbcAssembler.File;
+            Debug.Assert(file is not null, "Invalid state");
+
             foreach (HbcFunctionBuilder builder in Functions) {
                 file.SmallFuncHeaders[builder.FunctionId].Offset = (uint)ms.Position;
                 foreach (HasmInstructionToken insn in builder.Instructions) {
@@ -184,15 +198,19 @@ namespace Hasmer.Assembler.Visitor {
                 if (token is HasmFunctionModifierToken mod) {
                     switch (mod.ModifierType) {
                         case HasmFunctionModifierType.Id:
+                            if (!mod.Value.HasValue) throw new InvalidOperationException("Value missing");
                             builder.FunctionId = mod.Value.Value;
                             break;
                         case HasmFunctionModifierType.Params:
+                            if (!mod.Value.HasValue) throw new InvalidOperationException("Value missing");
                             builder.ParamCount = mod.Value.Value;
                             break;
                         case HasmFunctionModifierType.Registers:
+                            if (!mod.Value.HasValue) throw new InvalidOperationException("Value missing");
                             builder.FrameSize = mod.Value.Value;
                             break;
                         case HasmFunctionModifierType.Symbols:
+                            if (!mod.Value.HasValue) throw new InvalidOperationException("Value missing");
                             builder.EnvironmentSize = mod.Value.Value;
                             break;
                         case HasmFunctionModifierType.Strict:
@@ -208,6 +226,9 @@ namespace Hasmer.Assembler.Visitor {
         }
 
         public void Assemble() {
+            Debug.Assert(HbcAssembler.File is not null, "Invalid state");
+            Debug.Assert(HbcAssembler.DataAssembler is not null, "Invalid state");
+
             HbcFile file = HbcAssembler.File;
 
             Console.WriteLine("Parsing functions...");

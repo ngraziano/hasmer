@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
 using System.IO;
+using System.Diagnostics;
 
 namespace Hasmer {
     /// <summary>
@@ -63,7 +64,7 @@ namespace Hasmer {
         public static void WriteFromDefinition(HbcWriter writer, JToken def, object value) {
             if (def.Type == JTokenType.Array) {
                 JArray tuple = (JArray)def;
-                string type = (string)tuple[0];
+                string type = (string)tuple[0]!;
 
                 if (tuple[1].Type == JTokenType.Integer) {
                     int toWrite = (int)tuple[1];
@@ -75,7 +76,7 @@ namespace Hasmer {
                             throw new InvalidDataException("array is wrong length");
                         }
                         for (int i = 0; i < toWrite; i++) {
-                            WriteType(writer, type, array.GetValue(i));
+                            WriteType(writer, type, array.GetValue(i)!);
                         }
                     }
                 } else if (tuple[1].Type == JTokenType.String) {
@@ -85,7 +86,7 @@ namespace Hasmer {
                     throw new InvalidDataException("bad tuple definition");
                 }
             } else {
-                string type = (string)def;
+                string type = (string)def!;
                 WriteType(writer, type, value);
             }
         }
@@ -96,7 +97,7 @@ namespace Hasmer {
         public static object ReadFromDefinition(HbcReader reader, JToken def) {
             if (def.Type == JTokenType.Array) {
                 JArray tuple = (JArray)def;
-                string type = (string)tuple[0];
+                string type = (string)tuple[0]!;
 
                 if (tuple[1].Type == JTokenType.Integer) {
                     int toRead = (int)tuple[1];
@@ -116,7 +117,7 @@ namespace Hasmer {
                     throw new InvalidDataException("bad tuple definition");
                 }
             } else {
-                string type = (string)def;
+                string type = (string)def!;
                 return ReadType(reader, type);
             }
 
@@ -130,7 +131,8 @@ namespace Hasmer {
             T decoded = new T();
 
             foreach (JProperty property in obj.Properties()) {
-                PropertyInfo info = typeof(T).GetProperty(property.Name, BindingFlags.Public | BindingFlags.Instance);
+                PropertyInfo? info = typeof(T).GetProperty(property.Name, BindingFlags.Public | BindingFlags.Instance);
+                Debug.Assert(info is not null, "Internal error");
                 object value = ReadFromDefinition(reader, property.Value);
                 try {
                     info.SetValue(decoded, value);
@@ -148,8 +150,9 @@ namespace Hasmer {
         /// </summary>
         public static void Encode<T>(HbcWriter writer, JObject obj, T item) where T : HbcEncodedItem {
             foreach (JProperty property in obj.Properties()) {
-                PropertyInfo info = typeof(T).GetProperty(property.Name, BindingFlags.Public | BindingFlags.Instance);
-                WriteFromDefinition(writer, property.Value, info.GetValue(item));
+                PropertyInfo? info = typeof(T).GetProperty(property.Name, BindingFlags.Public | BindingFlags.Instance);
+                Debug.Assert(info is not null, "Internal error");
+                WriteFromDefinition(writer, property.Value, info.GetValue(item)??"");
             }
         }
     }

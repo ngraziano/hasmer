@@ -94,7 +94,7 @@ namespace Hasmer.Assembler.Parser {
         /// Returns *length* characters of the <see cref="Source" /> starting at the <see cref="Cursor" />.
         /// If the requested length is the beyond the amount of characters in the Source, null is returned.
         /// </summary>
-        public string Peek(int length) {
+        public string? Peek(int length) {
             SkipWhitespace();
 
             int r = Cursor + length;
@@ -134,8 +134,8 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// Advances the stream by *length* characters.
         /// </summary>
-        public string AdvanceCharacters(int length) {
-            string chars = Peek(length);
+        public string? AdvanceCharacters(int length) {
+            string? chars = Peek(length);
             if (chars == null) {
                 return null;
             }
@@ -202,7 +202,7 @@ namespace Hasmer.Assembler.Parser {
         /// <see cref="AdvanceOperator"/>
         /// </example>
         /// </summary>
-        public string PeekWord() {
+        public string? PeekWord() {
             int cursor = Cursor;
             HasmStringStreamWhitespaceMode wm = WhitespaceMode;
 
@@ -234,8 +234,8 @@ namespace Hasmer.Assembler.Parser {
         /// Advances the stream beyond the current word.
         /// </summary>
         /// <returns>the word that was read</returns>
-        public string AdvanceWord() {
-            string word = PeekWord();
+        public string? AdvanceWord() {
+            string? word = PeekWord();
             if (word == null) {
                 return null;
             }

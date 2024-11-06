@@ -12,12 +12,12 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The name of the function.
         /// </summary>
-        public HasmIdentifierToken Name { get; set; }
+        public required HasmIdentifierToken Name { get; set; }
 
         /// <summary>
         /// The tokens in the body of the function.
         /// </summary>
-        public List<HasmToken> Body { get; set; }
+        public required List<HasmToken> Body { get; set; }
 
         public HasmFunctionToken(HasmStringStreamState state) : base(state) { }
     }

@@ -16,12 +16,12 @@ namespace Hasmer {
         /// The human-readable name of the instruction.
         /// </summary>
         [JsonProperty]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         /// <summary>
         /// The types of all the operands the operand handles.
         /// </summary>
         [JsonProperty]
-        public List<HbcInstructionOperandType> OperandTypes { get; set; }
+        public required List<HbcInstructionOperandType> OperandTypes { get; set; }
         /// <summary>
         /// true if the operation is a jumping instruction (i.e. changes the current instruction being executed), or otherwise false.
         /// </summary>

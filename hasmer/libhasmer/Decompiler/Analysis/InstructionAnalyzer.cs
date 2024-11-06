@@ -7,11 +7,11 @@ using Hasmer.Decompiler.AST;
 
 namespace Hasmer.Decompiler.Analysis {
     public class InstructionAnalyzer {
-        public List<SyntaxNode> Body { get; set; }
-        public StaticAnalyzerState State { get; set; }
-        public DecompilerOptions Options { get; set; }
+        public required List<SyntaxNode> Body { get; set; }
+        public required StaticAnalyzerState State { get; set; }
+        public required DecompilerOptions Options { get; set; }
 
-        private Identifier FindIdentifierReference(SyntaxNode node, Identifier ident) {
+        private Identifier? FindIdentifierReference(SyntaxNode node, Identifier ident) {
             if (node == null) {
                 return null;
             }
@@ -25,8 +25,8 @@ namespace Hasmer.Decompiler.Analysis {
                 return array.Elements.Select(element => FindIdentifierReference(element, ident)).FirstOrDefault(x => x != null);
             }
             if (node is AssignmentExpression assignment) {
-                Identifier right = FindIdentifierReference(assignment.Right, ident);
-                Identifier left;
+                Identifier? right = FindIdentifierReference(assignment.Right, ident);
+                Identifier? left;
                 if (assignment.Left is Identifier) {
                     left = null;
                 } else if (assignment.Left is MemberExpression asnexp && asnexp.GetUltimateProperty() is Identifier asnident && asnident.Name == ident.Name) {
@@ -59,12 +59,12 @@ namespace Hasmer.Decompiler.Analysis {
             return null;
         }
 
-        private void RefactorVariableName(AssignmentExpression originalAssignment, SyntaxNode startNode, string newVariableName = null, Identifier originalIdentifier = null) {
+        private void RefactorVariableName(AssignmentExpression originalAssignment, SyntaxNode startNode, string? newVariableName = null, Identifier? originalIdentifier = null) {
             Identifier identifier = originalIdentifier ?? originalAssignment.Left.Cast<Identifier>();
 
             string variableName;
             if (newVariableName == null) {
-                string rootName = null;
+                string? rootName = null;
                 if (originalAssignment.Right is CallExpression call) {
                     if (call.Callee is MemberExpression) {
                         SyntaxNode node = call.Callee;
@@ -91,14 +91,14 @@ namespace Hasmer.Decompiler.Analysis {
                 variableName = newVariableName;
             }
 
-            SyntaxNode currentNode = startNode;
+            SyntaxNode? currentNode = startNode;
             while ((currentNode = currentNode.Next) != null) {
                 /*
                 if (currentNode is AssignmentExpression assn && assn.Left is Identifier left && left.Name == identifier.Name) {
                     left.ReplaceWith(new Identifier(variableName));
                 }
                 */
-                Identifier reference;
+                Identifier? reference;
                 while ((reference = FindIdentifierReference(currentNode, identifier)) != null) {
                     reference.ReplaceWith(new Identifier(variableName));
                 }
@@ -128,7 +128,7 @@ namespace Hasmer.Decompiler.Analysis {
 
         private void RemoveUnusedAssignment(AssignmentExpression originalAssignment) {
             Identifier identifier = originalAssignment.Left.Cast<Identifier>();
-            SyntaxNode currentNode = originalAssignment;
+            SyntaxNode? currentNode = originalAssignment;
             while ((currentNode = currentNode.Next) != null) {
                 if (FindIdentifierReference(currentNode, identifier) != null) {
                     // break when the identifier is referenced
@@ -163,9 +163,9 @@ namespace Hasmer.Decompiler.Analysis {
             }
 
             bool replacedAny = false;
-            SyntaxNode currentNode = startNode;
+            SyntaxNode? currentNode = startNode;
             while ((currentNode = currentNode.Next) != null) {
-                Identifier reference;
+                Identifier? reference;
                 while ((reference = FindIdentifierReference(currentNode, identifier)) != null) {
                     reference.ReplaceWith(value);
                     replacedAny = true;

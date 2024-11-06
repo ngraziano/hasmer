@@ -18,7 +18,7 @@ namespace Hasmer.Decompiler.AST {
                 builder.Write(StringEscape.Escape(Value.ToString()));
                 builder.Write("'");
             } else {
-                builder.Write(Value.ToString());
+                builder.Write(Value.ToString()!);
             }
         }
 

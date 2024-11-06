@@ -15,17 +15,17 @@ namespace Hasmer.Assembler {
         /// <summary>
         /// The data assembler instance.
         /// </summary>
-        public DataAssembler DataAssembler { get; set; }
+        public DataAssembler? DataAssembler { get; set; }
 
         /// <summary>
         /// The function assembler instance.
         /// </summary>
-        public FunctionAssembler FunctionAssembler { get; set; }
+        public FunctionAssembler? FunctionAssembler { get; set; }
 
         /// <summary>
         /// The Hermes bytecode file being assembled.
         /// </summary>
-        public HbcFile File { get; set; }
+        public HbcFile? File { get; set; }
 
         public bool IsExact { get; set; }
 

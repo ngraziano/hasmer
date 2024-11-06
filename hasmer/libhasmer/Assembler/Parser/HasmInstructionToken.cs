@@ -8,12 +8,12 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The name of the instruction.
         /// </summary>
-        public string Instruction { get; set; }
+        public required string Instruction { get; set; }
 
         /// <summary>
         /// The operands passed to the instruction.
         /// </summary>
-        public List<HasmOperandToken> Operands { get; set; }
+        public required List<HasmOperandToken> Operands { get; set; }
 
         public HasmInstructionToken(HasmStringStreamState state) : base(state) { }
     }

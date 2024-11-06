@@ -34,12 +34,12 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The index of the label, e.g. label = "L5", LabelIndex = 5
         /// </summary>
-        public HasmIntegerToken Index { get; set; }
+        public required HasmIntegerToken Index { get; set; }
 
         /// <summary>
         /// The offset after the label, used in label references. Example: label reference = "L5-6", Offset = -6
         /// </summary>
-        public HasmIntegerToken ReferenceOffset { get; set; }
+        public required HasmIntegerToken? ReferenceOffset { get; set; }
 
         public HasmLabelToken(HasmStringStreamState state) : base(state) { }
     }

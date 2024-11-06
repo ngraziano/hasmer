@@ -71,7 +71,10 @@ namespace Hasmer {
         /// <summary>
         /// Creates a new bytecode file (probably to be writen out). Does not parse anything.
         /// </summary>
-        public HbcFile() { }
+        // Need to see whats are the parameter to pass Version ?
+        //public HbcFile() {
+        //    Header = new HbcHeader();
+        //}
 
         /// <summary>
         /// Parses an entire Hermes bytecode file from the given reader.
@@ -87,7 +90,6 @@ namespace Hasmer {
             int padding = 31;
 
             Header.Version = reader.ReadUInt32();
-            Header.SourceHash = new byte[20];
             reader.Read(Header.SourceHash);
             Header.FileLength = reader.ReadUInt32();
             Header.GlobalCodeIndex = reader.ReadUInt32();
@@ -101,6 +103,9 @@ namespace Hasmer {
                 Header.BigIntCount = reader.ReadUInt32();
                 Header.BigIntStorageSize = reader.ReadUInt32();
                 padding -= sizeof(uint) * 2;
+            } else {
+                Header.BigIntCount = 0;
+                Header.BigIntStorageSize = 0;
             }
             Header.RegExpCount = reader.ReadUInt32();
             Header.RegExpStorageSize = reader.ReadUInt32();
@@ -198,11 +203,9 @@ namespace Hasmer {
             byte[] stringStorage = reader.ReadBytes((int)Header.StringStorageSize);
             reader.Align();
 
-            if (Header.Version >= 87) {
-                uint bigIntCount = Header.BigIntCount.Value;
-                BigIntTable = new HbcGenericTableEntry[bigIntCount];
-                BigIntStorage = ReadGenericTable(reader, BigIntTable, bigIntCount, Header.BigIntStorageSize.Value);
-            }
+            uint bigIntCount = Header.BigIntCount;
+            BigIntTable = new HbcGenericTableEntry[bigIntCount];
+            BigIntStorage = ReadGenericTable(reader, BigIntTable, bigIntCount, Header.BigIntStorageSize);
 
             ArrayBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ArrayBufferSize), this);
             reader.Align();
@@ -229,7 +232,7 @@ namespace Hasmer {
             Instructions = new byte[reader.BaseStream.Length - reader.BaseStream.Position];
             reader.BaseStream.Read(Instructions, 0, Instructions.Length);
 
-            CreateStringTable(stringStorage, smallStringTable, overflowStringTable, stringKinds, identifierHashes);
+            StringTable = CreateStringTable(stringStorage, smallStringTable, overflowStringTable, stringKinds, identifierHashes);
 
             BytecodeFormat = ResourceManager.ReadEmbeddedResource<HbcBytecodeFormat>($"Bytecode{Header.Version}");
         }
@@ -276,11 +279,11 @@ namespace Hasmer {
             using HbcWriter writer = new HbcWriter(ms);
 
             // write the initial header -- these values get overwritten when we rewrite the header as the last step
-            HbcEncodedItem.Encode(writer, (JObject)def["Header"], Header);
+            HbcEncodedItem.Encode(writer, (JObject)def["Header"]!, Header);
             writer.Align();
 
             foreach (HbcSmallFuncHeader header in SmallFuncHeaders) {
-                HbcEncodedItem.Encode(writer, (JObject)def["SmallFuncHeader"], header);
+                HbcEncodedItem.Encode(writer, (JObject)def["SmallFuncHeader"]!, header);
                 // TODO: large functions
             }
             writer.Align();
@@ -373,13 +376,13 @@ namespace Hasmer {
 
             // write small string table
             foreach (HbcSmallStringTableEntry entry in smallStrings) {
-                HbcEncodedItem.Encode(writer, (JObject)def["SmallStringTableEntry"], entry);
+                HbcEncodedItem.Encode(writer, (JObject)def["SmallStringTableEntry"]!, entry);
             }
             writer.Align();
 
             // write overflow string table
             foreach (HbcOverflowStringTableEntry entry in overflowStrings) {
-                HbcEncodedItem.Encode(writer, (JObject)def["OverflowStringTableEntry"], entry);
+                HbcEncodedItem.Encode(writer, (JObject)def["OverflowStringTableEntry"]!, entry);
             }
             writer.Align();
 
@@ -412,7 +415,7 @@ namespace Hasmer {
             // re-write the header with the final values after writing the rest of the stream
             Header.FileLength = (uint)ms.Position;
             ms.Position = 0;
-            HbcEncodedItem.Encode(writer, (JObject)def["Header"], Header);
+            HbcEncodedItem.Encode(writer, (JObject)def["Header"]!, Header);
 
             Console.WriteLine($"Wrote HBC!\n  IdentifierCount = {Header.IdentifierCount}\n  StringCount = {Header.StringCount}");
 
@@ -430,7 +433,7 @@ namespace Hasmer {
         /// <summary>
         /// Creates a parsed string table from the raw string storage data.
         /// </summary>
-        private void CreateStringTable(byte[] stringStorage, HbcSmallStringTableEntry[] smallStringTable, HbcOverflowStringTableEntry[] overflowStringTable, StringKindEntry[] stringKinds, uint[] identifierHashes) {
+        private static StringTableEntry[] CreateStringTable(byte[] stringStorage, HbcSmallStringTableEntry[] smallStringTable, HbcOverflowStringTableEntry[] overflowStringTable, StringKindEntry[] stringKinds, uint[] identifierHashes) {
             StringKind[] kindLookup = new StringKind[smallStringTable.Length];
             int k = 0;
             foreach (StringKindEntry entry in stringKinds) {
@@ -439,7 +442,7 @@ namespace Hasmer {
                 }
             }
 
-            StringTable = new StringTableEntry[smallStringTable.Length];
+            var  stringTable = new StringTableEntry[smallStringTable.Length];
             int identIdx = 0;
             for (uint i = 0; i < smallStringTable.Length; i++) {
                 HbcSmallStringTableEntry entry = smallStringTable[(int)i];
@@ -473,8 +476,9 @@ namespace Hasmer {
                         Console.WriteLine($"Warning: identifier '{stEntry.Value}' has invalid hash; expecting {hash} but calculated {stEntry.Hash}");
                     }
                 }
-                StringTable[i] = stEntry;
+                stringTable[i] = stEntry;
             }
+            return stringTable;
         }
     }
 }

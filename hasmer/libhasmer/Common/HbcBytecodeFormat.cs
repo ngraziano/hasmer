@@ -30,12 +30,12 @@ namespace Hasmer {
         /// This list can be indexed by the encoded value of the opcode.
         /// </summary>
         [JsonProperty]
-        public List<HbcInstructionDefinition> Definitions { get; set; }
+        public required List<HbcInstructionDefinition> Definitions { get; set; }
 
         /// <summary>
         /// The definitions of all abstractions for instructions that can take different length operands.
         /// See <see cref="HbcAbstractInstructionDefinition"/> for more information.
         /// </summary>
-        public List<HbcAbstractInstructionDefinition> AbstractDefinitions { get; set; }
+        public required List<HbcAbstractInstructionDefinition> AbstractDefinitions { get; set; }
     }
 }

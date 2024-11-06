@@ -7,6 +7,7 @@ using System.Reflection;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace Hasmer {
     /// <summary>
@@ -20,7 +21,7 @@ namespace Hasmer {
         public static string ReadEmbeddedResource(string name) {
             Assembly assembly = Assembly.GetExecutingAssembly();
 
-            using Stream stream = assembly.GetManifestResourceStream("Hasmer.Resources." + name + ".json");
+            using Stream stream = assembly.GetManifestResourceStream("Hasmer.Resources." + name + ".json") ?? throw new ArgumentOutOfRangeException(nameof(name));
             if (stream == null) {
                 throw new Exception("embedded resource does not exist: " + name);
             }
@@ -34,7 +35,9 @@ namespace Hasmer {
         /// <param name="name">The name of the resource, without the ".json" extension.</param>
         public static T ReadEmbeddedResource<T>(string name) {
             string str = ReadEmbeddedResource(name);
-            return JsonConvert.DeserializeObject<T>(str);
+            var result =  JsonConvert.DeserializeObject<T>(str);
+            Debug.Assert(result is not null, "Fail to read ressource as JSON");
+            return result;
         }
 
         /// <summary>

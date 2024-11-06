@@ -10,9 +10,9 @@ namespace Hasmer.Decompiler.AST {
     /// Represents a token in the JavaScript syntax tree.
     /// </summary>
     public abstract class SyntaxNode {
-        internal SyntaxNode Previous { get; set; }
-        internal SyntaxNode Next { get; set; }
-        internal SyntaxNode Parent { get; set; }
+        internal SyntaxNode? Previous { get; set; }
+        internal SyntaxNode? Next { get; set; }
+        internal SyntaxNode? Parent { get; set; }
         public bool Replaced { get; private set; }
 
         public void ReplaceWith(SyntaxNode node) {

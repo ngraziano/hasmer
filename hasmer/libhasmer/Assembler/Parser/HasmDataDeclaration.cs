@@ -21,7 +21,7 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The label of the data.
         /// </summary>
-        public HasmLabelToken Label { get; set; }
+        public required HasmLabelToken Label { get; set; }
 
         /// <summary>
         /// The kind of the data.
@@ -38,6 +38,6 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The tokens that define the contents of the data, if there are specific elements.
         /// </summary>
-        public List<HasmLiteralToken> Elements { get; set; }
+        public List<HasmLiteralToken> Elements { get; set; } = [];
     }
 }

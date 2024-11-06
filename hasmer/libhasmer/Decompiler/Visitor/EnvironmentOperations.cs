@@ -13,7 +13,7 @@ namespace Hasmer.Decompiler.Visitor {
         /// <summary>
         /// The decompiler context of the environment.
         /// </summary>
-        public DecompilerContext EnvironmentContext { get; set; }
+        public required DecompilerContext EnvironmentContext { get; set; }
 
         /// <summary>
         /// The name of the function which defined the environment.
@@ -65,7 +65,8 @@ namespace Hasmer.Decompiler.Visitor {
             byte environment = context.Instruction.Operands[1].GetValue<byte>();
             ushort slot = context.Instruction.Operands[2].GetValue<ushort>();
 
-            EnvironmentIdentifier env = (EnvironmentIdentifier)context.State.Registers[environment];
+            var env = (EnvironmentIdentifier?)context.State.Registers[environment];
+            if (env is null) throw new InvalidOperationException("Environment register is null");
             context.State.Registers[destination] = new MemberExpression {
                 Object = new Identifier(env.EnvironmentName),
                 Property = new Identifier($"env{slot}")
@@ -84,13 +85,15 @@ namespace Hasmer.Decompiler.Visitor {
 
             context.State.Registers.MarkUsage(valueRegister);
 
-            EnvironmentIdentifier env = (EnvironmentIdentifier)context.State.Registers[environment];
+            var env = (EnvironmentIdentifier?)context.State.Registers[environment];
+            if(env is null ) throw new InvalidOperationException("Environment register is null");
             context.Block.Body.Add(new AssignmentExpression {
                 Left = new MemberExpression {
                     Object = new Identifier(env.EnvironmentName),
                     Property = new Identifier($"env{slot}")
                 },
-                Right = context.State.Registers[valueRegister],
+
+                Right = context.State.Registers[valueRegister] ?? throw new InvalidOperationException("Invalid register value"),
                 Operator = "="
             });
         }

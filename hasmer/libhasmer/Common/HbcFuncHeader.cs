@@ -75,12 +75,12 @@ namespace Hasmer {
         public HbcFuncHeaderFlags Flags { get; set; }
 
         [JsonIgnore]
-        public HbcFile DeclarationFile { get; set; }
+        public required HbcFile DeclarationFile { get; set; }
 
         /// <summary>
         /// The disassembled instructions of the function cached by a call to <see cref="HbcFuncHeader.Disassemble"/>.
         /// </summary>
-        private List<HbcInstruction> CachedInstructions { get; set; }
+        private List<HbcInstruction>? CachedInstructions { get; set; }
 
         /// <summary>
         /// Gets the header that should be used for disassembly and decompilation, i.e. the header that contains instructions.

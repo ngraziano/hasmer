@@ -21,12 +21,12 @@ namespace Hasmer {
         /// The assembler will decide which to use based on the operands at assemble time.
         /// </summary>
         [JsonProperty]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         /// <summary>
         /// The opcodes of each variant that can be defined by this abstract definition.
         /// </summary>
         [JsonProperty]
-        public List<uint> VariantOpcodes { get; set; }
+        public required List<uint> VariantOpcodes { get; set; }
     }
 }

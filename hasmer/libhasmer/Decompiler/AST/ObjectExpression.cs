@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Hasmer.Decompiler.AST {
     public class ObjectExpressionProperty : SyntaxNode {
-        public SyntaxNode Key { get; set; }
-        public SyntaxNode Value { get; set; }
+        public required SyntaxNode Key { get; set; }
+        public required SyntaxNode Value { get; set; }
         public bool IsComputed { get; set; }
 
         public override void WriteDirect(SourceCodeBuilder builder) {
@@ -24,11 +24,7 @@ namespace Hasmer.Decompiler.AST {
     }
 
     public class ObjectExpression : SyntaxNode {
-        public List<ObjectExpressionProperty> Properties { get; set; }
-
-        public ObjectExpression() {
-            Properties = new List<ObjectExpressionProperty>();
-        }
+        public List<ObjectExpressionProperty> Properties { get; set; } = [];
 
         public override void WriteDirect(SourceCodeBuilder builder) {
             if (Properties.Count == 0) {

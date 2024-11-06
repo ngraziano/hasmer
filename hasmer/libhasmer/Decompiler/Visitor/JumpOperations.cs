@@ -42,44 +42,54 @@ namespace Hasmer.Decompiler.Visitor {
         /// since the if statement is executed if the expression is equal,
         /// and the jump is performed if the expression is not equal.
         /// </summary>
-        private static void ConditionalJump(DecompilerContext context, SyntaxNode expr) {
+        private static void ConditionalJump(DecompilerContext context, SyntaxNode? expr) {
+            ArgumentNullException.ThrowIfNull(expr);
+
             int jump = context.Instruction.Operands[0].GetValue<int>();
 
-            IfStatement ifBlock = new IfStatement {
-                Test = expr
-            };
-
-            BlockStatement general = null;
+            BlockStatement? general = null;
             if (jump < 0) {
                 throw new NotImplementedException();
             } else if (jump > 0) {
                 ControlFlowBlock jumpingBlock = context.ControlFlowGraph.GetBlockContainingOffset(context.Instruction.Offset);
 
                 DecompilerContext consequentContext = context.DeepCopy();
-                ControlFlowBlock consequentControlBlock = context.ControlFlowGraph.GetBlockAtOffset(jumpingBlock.Consequent.Value);
-                ifBlock.Consequent = DecompileConditionalBlock(consequentContext, context.ControlFlowGraph.GetBlockInstructions(consequentControlBlock).ToList());
+                if (!jumpingBlock.Consequent.HasValue) throw new InvalidOperationException("Jumping block does not have a consequent block.");
+                ControlFlowBlock? consequentControlBlock = context.ControlFlowGraph.GetBlockAtOffset(jumpingBlock.Consequent.Value);
+                if(consequentControlBlock is null) throw new InvalidOperationException("Consequent control block is null.");
+                IfStatement ifBlock = new IfStatement {
+                    Test = expr,
+                    Consequent = DecompileConditionalBlock(consequentContext, context.ControlFlowGraph.GetBlockInstructions(consequentControlBlock).ToList())
+                };
 
                 DecompilerContext alternateContext = context.DeepCopy();
-                ControlFlowBlock alternateControlBlock = context.ControlFlowGraph.GetBlockAtOffset(jumpingBlock.Alternate.Value);
+                ControlFlowBlock? alternateControlBlock =
+                    jumpingBlock.Alternate.HasValue ? context.ControlFlowGraph.GetBlockAtOffset(jumpingBlock.Alternate.Value) : null;
 
-                BlockStatement elseBlock = DecompileConditionalBlock(alternateContext, context.ControlFlowGraph.GetBlockInstructions(alternateControlBlock).ToList());
-                // TODO
-                if (context.ControlFlowGraph.GetBlockType(alternateControlBlock) == ControlFlowBlockType.General) {
-                    general = elseBlock;
-                } else {
-                    ifBlock.Alternate = elseBlock;
+
+
+                if (alternateControlBlock is not null) {
+                    BlockStatement elseBlock = DecompileConditionalBlock(alternateContext, context.ControlFlowGraph.GetBlockInstructions(alternateControlBlock).ToList());
+                    // TODO
+                    if (context.ControlFlowGraph.GetBlockType(alternateControlBlock) == ControlFlowBlockType.General) {
+                        general = elseBlock;
+                    } else {
+                        ifBlock.Alternate = elseBlock;
+                    }
                 }
-
+                
                 FunctionDecompiler.WriteRemainingRegisters(consequentContext);
-                FunctionDecompiler.WriteRemainingRegisters(alternateContext);
-
+                if (alternateContext is not null) {
+                    FunctionDecompiler.WriteRemainingRegisters(alternateContext);
+                }
                 // uint largestOffset = Math.Max(consequentControlBlock.BaseOffset + consequentControlBlock.Length, alternateControlBlock.BaseOffset + alternateControlBlock.Length);
                 // int largestIndex = context.Instructions.FindIndex(insn => insn.Offset == largestOffset);
                 // context.CurrentInstructionIndex = largestIndex;
                 context.CurrentInstructionIndex = context.Instructions.Count;
+                context.Block.Body.Add(ifBlock);
             }
 
-            context.Block.Body.Add(ifBlock);
+            
             if (general != null) {
                 context.Block.Body.AddRange(general.Body);
             }
@@ -142,7 +152,7 @@ namespace Hasmer.Decompiler.Visitor {
             context.State.Registers.MarkUsage(arg);
             ConditionalJump(context, new UnaryExpression {
                 Operator = "!",
-                Argument = context.State.Registers[arg]
+                Argument = context.State.Registers[arg] ?? throw new InvalidOperationException("Register is null"),
             });
         }
 

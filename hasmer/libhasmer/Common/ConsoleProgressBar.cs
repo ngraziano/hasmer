@@ -35,7 +35,7 @@ namespace Hasmer {
             Interlocked.Exchange(ref currentProgress, value);
         }
 
-        private void TimerHandler(object state) {
+        private void TimerHandler(object? state) {
             lock (timer) {
                 if (disposed) return;
 

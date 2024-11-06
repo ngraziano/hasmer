@@ -25,7 +25,7 @@ namespace Hasmer {
         /// <summary>
         /// The operands passed to the instruction.
         /// </summary>
-        public List<HbcInstructionOperand> Operands { get; set; }
+        public required List<HbcInstructionOperand> Operands { get; set; }
 
         /// <summary>
         /// Converts the instruction into a human-readable disassembly format used for debugging.

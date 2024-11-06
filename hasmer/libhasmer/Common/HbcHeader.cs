@@ -21,7 +21,7 @@
         /// <summary>
         /// A hex string representing the SHA1 hash of the original JavaScript source code that was compiled into Hermes bytecode.
         /// </summary>
-        public byte[] SourceHash { get; set; }
+        public byte[] SourceHash { get; } = new byte[20];
 
         /// <summary>
         /// The total length in bytes of the bytecode file.
@@ -57,9 +57,9 @@
         /// </summary>
         public uint StringStorageSize { get; set; }
 
-        public uint? BigIntCount { get; set; }
+        public uint BigIntCount { get; set; }
 
-        public uint? BigIntStorageSize { get; set; }
+        public uint BigIntStorageSize { get; set; }
 
         public uint RegExpCount { get; set; }
 
@@ -103,7 +103,7 @@
         /// <summary>
         /// 31 bytes of arbitrary padding.
         /// </summary>
-        public byte[] Padding { get; set; }
+        public byte[] Padding { get; set; } = [];
     }
 
     /// <summary>

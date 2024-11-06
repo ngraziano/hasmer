@@ -53,17 +53,11 @@ namespace Hasmer.Assembler {
                     default:
                         break;
                 }
-                string mapped;
-                if (items.Items is PrimitiveIdxStringValue) {
-                    mapped = StringEscape.Escape(items.Items.ToString());
-                } else {
-                    mapped = items.Items.ToString();
-                }
                 string tagType = items.TagType switch {
                     HbcDataBufferTagType.ByteString or HbcDataBufferTagType.ShortString or HbcDataBufferTagType.LongString => "String",
                     _ => items.TagType.ToString()
                 };
-                builder.AppendLine($".data {prefix}{i} Off:{items.Offset} {tagType}[] {mapped}");
+                builder.AppendLine($".data {prefix}{i} Off:{items.Offset} {tagType}[] {items.Items.ToAsmString()}");
             }
             if (buffer.Count > 0) {
                 builder.AppendLine();

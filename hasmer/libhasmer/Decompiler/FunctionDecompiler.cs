@@ -81,7 +81,7 @@ namespace Hasmer.Decompiler {
             for (int i = 0; i < context.State.CallExpressions.Length; i++) {
                 int exprIndex = context.State.CallExpressions[i];
                 if (exprIndex != -1) {
-                    context.Block.Body[exprIndex] = context.State.Registers[i];
+                    context.Block.Body[exprIndex] = context.State.Registers[i] ?? throw new InvalidOperationException("Register is null");
                     context.State.Registers[i] = null;
                     context.State.CallExpressions[i] = -1;
                 }
@@ -137,9 +137,9 @@ namespace Hasmer.Decompiler {
         /// <summary>
         /// Decompiles this function into an AST structure.
         /// </summary>
-        public SyntaxNode CreateAST(DecompilerContext parent) {
+        public SyntaxNode CreateAST(DecompilerContext? parent) {
             BlockStatement block = new BlockStatement();
-            DecompilerContext context = new DecompilerContext {
+            DecompilerContext context = new DecompilerContext(Header.FrameSize) {
                 Parent = parent,
                 Function = Header,
                 Decompiler = Decompiler,
@@ -166,7 +166,6 @@ namespace Hasmer.Decompiler {
                 HbcHeader = Header
             };
 
-            context.State = new FunctionState(context, Header.FrameSize);
 
             while (context.CurrentInstructionIndex < context.Instructions.Count) {
                 ObserveInstruction(context, context.CurrentInstructionIndex);

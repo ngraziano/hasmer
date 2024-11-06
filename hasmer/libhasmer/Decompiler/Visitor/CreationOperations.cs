@@ -74,7 +74,7 @@ namespace Hasmer.Decompiler.Visitor {
                     _ => keys[i].RawValue?.ToString() ?? "null"
                 };*/
                 // mayne encode
-                string keyAsString = keys[i].ToString();
+                string keyAsString = keys[i].ToString()!;
 
                 SyntaxNode key;
                 if (Identifier.NamePattern.IsMatch(keyAsString)) {

@@ -13,7 +13,7 @@ namespace Hasmer.Decompiler {
         /// <summary>
         /// Represents the contents of each register as a JavaScript syntax object.
         /// </summary>
-        public SyntaxNode[] Storage { get; set; }
+        public SyntaxNode?[] Storage { get; set; }
 
         /// <summary>
         /// Represents the amount of times the value of each register has been referenced while the register retains that value.
@@ -68,9 +68,9 @@ namespace Hasmer.Decompiler {
         /// If a call expression is located at a register which is being overriden with a new value,
         /// the call expression is immediately added to the source tree, and then the register is replaced with the argument.
         /// </summary>
-        public SyntaxNode this[uint register] {
+        public SyntaxNode? this[uint register] {
             get {
-                SyntaxNode value = Storage[register];
+                SyntaxNode? value = Storage[register];
                 if (value is CallExpression && State.CallExpressions[register] != -1) {
                     // using the result of a call expression -- clear it from the call expressions table
                     State.CallExpressions[register] = -1;
@@ -79,7 +79,7 @@ namespace Hasmer.Decompiler {
             }
             set {
                 if (value != null) {
-                    SyntaxNode previous = Storage[register];
+                    SyntaxNode? previous = Storage[register];
                     if (previous is CallExpression && State.CallExpressions[register] != -1) {
                         // if we overwrite the result of a call expression, but never actually used the value, that means the call was never decompiled
                         // so we explicitly write the decompilation here
@@ -94,7 +94,7 @@ namespace Hasmer.Decompiler {
             }
         }
 
-        public SyntaxNode this[int index] {
+        public SyntaxNode? this[int index] {
             get => this[(uint)index];
             set => this[(uint)index] = value;
         }

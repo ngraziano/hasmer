@@ -51,12 +51,5 @@ namespace Hasmer.Assembler.Parser {
             ErrorMessage = message;
         }
 
-        /// <summary>
-        /// Creates a new HasmParserException given the current stream and an exception.
-        /// </summary>
-        public HasmParserException(HasmStringStream stream, Exception e) : base(e.Message, e) {
-            Line = stream.CurrentLine + 1;
-            Column = stream.CurrentColumn + 1;
-        }
     }
 }

@@ -72,7 +72,7 @@ namespace Hasmer.Decompiler.Visitor {
 
             context.Block.WriteResult(register, new MemberExpression {
                 Object = new Identifier("arguments"),
-                Property = context.State.Registers[index]
+                Property = context.State.Registers[index] ?? throw new InvalidOperationException("Argument register is null")
             });
         }
 

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Hasmer.Decompiler.AST {
     public class MethodDefinition : SyntaxNode {
-        public SyntaxNode Key { get; set; }
-        public FunctionDeclaration Value { get; set; }
+        public required SyntaxNode Key { get; set; }
+        public required FunctionDeclaration Value { get; set; }
         public bool IsStatic { get; set; }
         public bool IsComputed { get; set; }
 

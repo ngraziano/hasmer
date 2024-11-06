@@ -12,7 +12,7 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The value of the string, without double quotes.
         /// </summary>
-        public string Value { get; set; }
+        public required string Value { get; set; }
 
         public HasmStringToken(HasmStringStreamState state) : base(state) { }
     }
@@ -24,7 +24,7 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// The name of the identifier, without the angled brackets.
         /// </summary>
-        public string Value { get; set; }
+        public required string Value { get; set; }
 
         public HasmIdentifierToken(HasmStringStreamState state) : base(state) { }
     }
@@ -38,7 +38,7 @@ namespace Hasmer.Assembler.Parser {
             Escape
         }
 
-        private HasmLiteralToken TryParse(HasmReaderState asm) {
+        private HasmLiteralToken? TryParse(HasmReaderState asm) {
             HasmStringStreamWhitespaceMode prevMode = asm.Stream.WhitespaceMode;
             asm.Stream.WhitespaceMode = HasmStringStreamWhitespaceMode.Keep;
 
@@ -78,7 +78,7 @@ namespace Hasmer.Assembler.Parser {
                             case 't': m = '\t'; break;
                             case 'v': m = '\v'; break;
                             case 'u':
-                                string hex = asm.Stream.AdvanceCharacters(4);
+                                string? hex = asm.Stream.AdvanceCharacters(4);
                                 if (hex == null) {
                                     asm.Stream.WhitespaceMode = prevMode;
                                     return null;
@@ -128,19 +128,14 @@ namespace Hasmer.Assembler.Parser {
 
         public bool CanParse(HasmReaderState asm) {
             HasmStringStreamState state = asm.Stream.SaveState();
-            HasmLiteralToken s = TryParse(asm);
+            HasmLiteralToken? s = TryParse(asm);
             asm.Stream.LoadState(state);
             return s != null;
         }
 
         public HasmToken Parse(HasmReaderState asm) {
             HasmStringStreamState state = asm.Stream.SaveState();
-            HasmLiteralToken s = TryParse(asm);
-            if (s == null) {
-                throw new HasmParserException(asm.Stream, "invalid string literal or identifier");
-            }
-
-            return s;
+            return TryParse(asm) ?? throw new HasmParserException(asm.Stream, "invalid string literal or identifier");
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Hasmer.Assembler.Parser;
+using System.Diagnostics;
 
 namespace Hasmer.Assembler.Visitor {
     /// <summary>
@@ -134,6 +135,7 @@ namespace Hasmer.Assembler.Visitor {
                 };
 
                 if (kind == HasmDataDeclarationKind.String) {
+                    Debug.Assert(data.Elements is not null, "Data shoud be not null for string");
                     IEnumerable<uint> ids = data.Elements.Cast<HasmStringToken>().Select(str => GetStringId(str.Value, StringKind.Literal));
                     foreach (uint id in ids) {
                         if (id > ushort.MaxValue) {

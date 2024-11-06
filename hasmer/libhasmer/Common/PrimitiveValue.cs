@@ -11,7 +11,7 @@ namespace Hasmer {
         /// <summary>
         /// The raw value, stored as an object. You probably don't want to use this, use GetValue() instead.
         /// </summary>
-        public abstract object RawValue { get;}
+        public abstract object? RawValue { get;}
 
         /// <summary>
         /// Returns the raw value coerced to a ulong.
@@ -49,7 +49,7 @@ namespace Hasmer {
             return idx.GetHashCode();
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is PrimitiveIdxStringValue primitive) {
                 return idx.Equals(primitive.idx);
             }
@@ -83,7 +83,7 @@ namespace Hasmer {
             return typedValue.GetHashCode();
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is PrimitiveNumberValue primitive) {
                 return typedValue.Equals(primitive.typedValue);
             }
@@ -110,7 +110,7 @@ namespace Hasmer {
             return typedValue.GetHashCode();
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is PrimitiveIntegerValue primitive) {
                 return typedValue.Equals(primitive.typedValue);
             }
@@ -122,13 +122,13 @@ namespace Hasmer {
 
     public class PrimitiveNullValue : PrimitiveValue {
 
-        public override object RawValue => null;
+        public override object? RawValue => null;
 
         public override ulong GetIntegerValue() {
             throw new Exception("cannot get integer value of non-integer PrimitiveValue");
         }
 
-        public override T GetValue<T>() => default;
+        public override T GetValue<T>() => throw new InvalidOperationException("Should not be called");
 
         public override string ToString() => "null";
 
@@ -136,7 +136,7 @@ namespace Hasmer {
             return "null".GetHashCode();
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is PrimitiveNullValue primitive) {
                 return true;
             }
@@ -151,7 +151,7 @@ namespace Hasmer {
 
         public PrimitiveBoolValue(bool value) { typedValue = value; }
 
-        public override object RawValue => typedValue;
+        public override object? RawValue => typedValue;
 
         public override ulong GetIntegerValue() {
             throw new Exception("cannot get integer value of non-integer PrimitiveValue");
@@ -165,7 +165,7 @@ namespace Hasmer {
             return typedValue.GetHashCode();
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is PrimitiveBoolValue primitive) {
                 return typedValue.Equals(primitive.typedValue);
             }

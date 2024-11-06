@@ -17,7 +17,10 @@ namespace Hasmer {
         /// Escapes a string so that it can be used as string literal in Hasm source code.
         /// Shamelessly taken from https://stackoverflow.com/a/14087738.
         /// </summary>
-        public static string Escape(string s) {
+        public static string Escape(string? s) {
+            if (s is null) {
+                return "null";
+            }
             StringBuilder literal = new StringBuilder(s.Length + 2);
             literal.Append("\"");
             foreach (char c in s) {

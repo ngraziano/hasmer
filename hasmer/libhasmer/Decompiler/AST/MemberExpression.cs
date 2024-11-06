@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Hasmer.Decompiler.AST {
     public class MemberExpression : SyntaxNode {
-        public SyntaxNode Object { get; set; }
-        public SyntaxNode Property { get; set; }
+        public required SyntaxNode Object { get; set; }
+        public required SyntaxNode Property { get; set; }
         public bool IsComputed { get; set; }
 
         private bool AutoCompute;

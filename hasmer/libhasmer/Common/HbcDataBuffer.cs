@@ -42,15 +42,15 @@ namespace Hasmer {
     /// Represents an entry in the data buffer (data type and subsequent items).
     /// </summary>
     public record HbcDataBufferItems {
-        public HbcDataBufferTagType TagType { get; set; }
+        public required HbcDataBufferTagType TagType { get; set; }
         /// <summary>
         /// The items for the data buffer entry.
         /// </summary>
-        public PrimitiveValue Items { get; set; }
+        public required PrimitiveValue Items { get; set; }
         /// <summary>
         /// The offset of the entry (from the start of the header) relative to the start of the entire buffer.
         /// </summary>
-        public uint Offset { get; set; }
+        public required uint Offset { get; set; }
     }
 
     /// <summary>

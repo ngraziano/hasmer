@@ -99,7 +99,8 @@ namespace Hasmer.Decompiler.Visitor {
             byte objRegister = context.Instruction.Operands[0].GetValue<byte>();
             byte sourceRegister = context.Instruction.Operands[1].GetValue<byte>();
 
-            SyntaxNode obj;
+            
+            SyntaxNode? obj;
             if (context.State.Variables[objRegister] != null) {
                 obj = new Identifier(context.State.Variables[objRegister]);
             } else {
@@ -135,7 +136,7 @@ namespace Hasmer.Decompiler.Visitor {
             if (context.State.Variables[objRegister] != null) {
                 obj = new Identifier(context.State.Variables[objRegister]);
             } else {
-                obj = context.State.Registers[objRegister];
+                obj = context.State.Registers[objRegister] ?? throw new InvalidOperationException("Register is null");
             }
 
             context.State.Registers.MarkUsage(objRegister);

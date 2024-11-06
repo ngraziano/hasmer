@@ -7,19 +7,15 @@ using Newtonsoft.Json;
 
 namespace Hasmer.Decompiler.AST {
     public class FunctionDeclaration : SyntaxNode {
-        public Identifier Name { get; set; }
+        public Identifier? Name { get; set; }
         public bool IsGenerator { get; set; }
         public bool IsAsync { get; set; }
-        public List<Identifier> Parameters { get; set; }
-        public BlockStatement Body { get; set; }
+        public List<Identifier> Parameters { get; set; } = [];
+        public required BlockStatement Body { get; set; }
         public bool IsExpression { get; set; }
 
         [JsonIgnore]
-        public HbcFuncHeader HbcHeader { get; set; }
-
-        public FunctionDeclaration() {
-            Parameters = new List<Identifier>();
-        }
+        public required HbcFuncHeader HbcHeader { get; set; }
 
         public override void WriteDirect(SourceCodeBuilder builder) {
             if (IsAsync) {

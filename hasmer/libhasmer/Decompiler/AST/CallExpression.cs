@@ -6,13 +6,9 @@ using System.Threading.Tasks;
 
 namespace Hasmer.Decompiler.AST {
     public class CallExpression : SyntaxNode {
-        public SyntaxNode Callee { get; set; }
-        public List<SyntaxNode> Arguments { get; set; }
+        public required SyntaxNode Callee { get; set; }
+        public List<SyntaxNode> Arguments { get; set; } = [];
         public bool IsCalleeConstructor { get; set; }
-
-        public CallExpression() {
-            Arguments = new List<SyntaxNode>();
-        }
 
         public override void WriteDirect(SourceCodeBuilder builder) {
             if (IsCalleeConstructor) {

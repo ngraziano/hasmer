@@ -19,6 +19,6 @@ namespace Hasmer.Assembler.Parser {
         /// <summary>
         /// Parses a token from the stream, affecting its state.
         /// </summary>
-        HasmToken Parse(HasmReaderState asm);
+        HasmToken? Parse(HasmReaderState asm);
     }
 }
