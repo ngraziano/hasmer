@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Hasmer.Assembler {
     /// <summary>
@@ -34,9 +33,9 @@ namespace Hasmer.Assembler {
         /// Disassembles the bytecode file to Hasm disassembly.
         /// </summary>
         public string Disassemble() {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             builder.Append(".hasm ");
-            builder.Append(Source.Header.Version.ToString());
+            builder.Append(Source.Header.Version);
             if (Options.IsExact) {
                 builder.AppendLine(" exact");
             } else {
@@ -44,39 +43,24 @@ namespace Hasmer.Assembler {
             }
 
             Console.WriteLine("Check references... ");
-            foreach (var funcHeader in Source.SmallFuncHeaders) {
-                var header = funcHeader.GetAssemblerHeader();
-                foreach (var instr in header.Disassemble()) {
-                    // TODO see if we can make better
-                    switch (Source.BytecodeFormat.Definitions[instr.Opcode].Name) {
-                        case "NewArrayWithBuffer":
-                        case "NewArrayWithBufferLong":
-                            if (instr.Operands[3].Value is PrimitiveIntegerValue offset 
-                                && instr.Operands[2].Value is PrimitiveIntegerValue size) {
-                                Source.ArrayBuffer.AddRef(offset.GetIntegerValue(), size.GetIntegerValue(),new CodeRef(funcHeader.FunctionId,instr.Offset));
-                            }
-                            break;
-                    }
-                }
-            }
+            AddReferences();
 
             Console.WriteLine("Disassembling data... ");
-            
+
 
             builder.AppendLine();
-            var dataDisassembler = new DataDisassembler(Source, Source.ArrayBuffer, 'A') {
-                IsVerbose = Options.IsVerbose
-            };
-            builder.AppendLine(dataDisassembler.Disassemble());
+            builder.AppendLine(DataDisassembler.Disassemble(Source.ArrayBuffer, Options.IsVerbose));
+            builder.AppendLine(DataDisassembler.Disassemble(Source.ObjectKeyBuffer, Options.IsVerbose));
+            builder.AppendLine(DataDisassembler.Disassemble(Source.ObjectValueBuffer, Options.IsVerbose));
             builder.AppendLine();
 
             Console.WriteLine("Disassembling functions... ");
-            using (ConsoleProgressBar progress = new ConsoleProgressBar()) {
+            using (var progress = new ConsoleProgressBar()) {
                 for (int i = 0; i < Source.SmallFuncHeaders.Length; i++) {
                     progress.Report(i / (double)Source.SmallFuncHeaders.Length);
 
                     HbcSmallFuncHeader func = Source.SmallFuncHeaders[i];
-                    FunctionDisassembler decompiler = new FunctionDisassembler(this, func.GetAssemblerHeader());
+                    var decompiler = new FunctionDisassembler(this, func.GetAssemblerHeader());
                     builder.AppendLine(decompiler.Disassemble());
                     builder.AppendLine();
                 }
@@ -85,6 +69,34 @@ namespace Hasmer.Assembler {
             Console.WriteLine("done!");
 
             return builder.ToString();
+        }
+
+        private void AddReferences() {
+            foreach (var funcHeader in Source.SmallFuncHeaders) {
+                var header = funcHeader.GetAssemblerHeader();
+                foreach (var instr in header.Disassemble()) {
+                    // TODO see if we can make better
+                    switch (Source.BytecodeFormat.Definitions[instr.Opcode].Name) {
+                        case "NewArrayWithBuffer":
+                        case "NewArrayWithBufferLong":
+                            if (instr.Operands[3].Value is PrimitiveIntegerValue offset
+                                && instr.Operands[2].Value is PrimitiveIntegerValue size) {
+                                Source.ArrayBuffer.AddRef(offset.GetIntegerValue(), size.GetIntegerValue(), new CodeRef(funcHeader.FunctionId, instr.Offset));
+                            }
+                            break;
+                        case "NewObjectWithBuffer":
+                        case "NewObjectWithBufferLong":
+                            if (instr.Operands[3].Value is PrimitiveIntegerValue offsetKey
+                                && instr.Operands[4].Value is PrimitiveIntegerValue offsetValue
+                                && instr.Operands[2].Value is PrimitiveIntegerValue sizeObject) {
+                                Source.ObjectKeyBuffer.AddRef(offsetKey.GetIntegerValue(), sizeObject.GetIntegerValue(), new CodeRef(funcHeader.FunctionId, instr.Offset));
+                                Source.ObjectValueBuffer.AddRef(offsetValue.GetIntegerValue(), sizeObject.GetIntegerValue(), new CodeRef(funcHeader.FunctionId, instr.Offset));
+
+                            }
+                            break;
+                    }
+                }
+            }
         }
     }
 }

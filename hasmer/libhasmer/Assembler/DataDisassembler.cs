@@ -8,49 +8,13 @@ namespace Hasmer.Assembler {
     /// <summary>
     /// Used for diassembling the data section of a Hermes bytecode file.
     /// </summary>
-    public class DataDisassembler {
-        private readonly HbcDataBuffer buffer;
-        private readonly char prefix;
-
-        /// <summary>
-        /// The Hermes bytecode file being disassembled.
-        /// </summary>
-        public HbcFile Source { get; set; }
-        public bool IsVerbose { get; set; }
-
-        /// <summary>
-        /// Creates a new DataDisassembler for a given Hermes bytecode file.
-        /// </summary>
-        public DataDisassembler(HbcFile source, HbcDataBuffer arrayBuffer, char prefix) {
-            Source = source;
-
-            this.buffer = arrayBuffer;
-            this.prefix = prefix;
-        }
-
-        /// <summary>
-        /// Returns an array containing *length* items starting at buffer offset *offset* in the given buffer.
-        /// If *length* extends over multiple entries in the array buffer (i.e. multiple data declarations),
-        /// the elements from all entries are returned in order.
-        /// This enables reading over multiple entries at once.
-        /// </summary>
-        public static List<PrimitiveValue> GetElementSeries(List<HbcDataBufferItems> buffer, uint offset, int length) {
-            var idx = buffer.FindIndex(item => item.Offset == offset);
-            if (idx < 0) {
-                Console.WriteLine($"WARN :Offset {offset} not found in buffer.");
-                return [];
-                //throw new IndexOutOfRangeException("Offset invalid");
-            }
-
-            return buffer.Skip(idx).Take(length).Select(i => i.Item).ToList();
-        }
-
+    public  static class DataDisassembler {
+ 
         /// <summary>
         /// Writes an entire buffer (i.e. key/array/value/etc.) as disassembly.
         /// </summary>
-        public string Disassemble() {
-            StringBuilder builder = new StringBuilder();
-            int i = 0;
+        public static string Disassemble(HbcDataBuffer buffer, bool isVerbose) {
+            var builder = new StringBuilder();
             foreach (var (offset, references) in buffer.References) {
 
                 var (listPrefix, listelement) = buffer.GetOneSerie(offset);
@@ -70,19 +34,18 @@ namespace Hasmer.Assembler {
                         builder.Append($".data {references.Name} {tagType}[{listelement.Count}] {{ {string.Join(", ", listelement.Select(l => l.ToAsmString()))} }}");
                         break;
                 }
-                if(IsVerbose) {
+                if(isVerbose) {
                     builder.AppendLine($" // offset {offset} ");
                 } else {
                     builder.AppendLine();
                 }
 
-                if(IsVerbose) {
+                if(isVerbose) {
                     foreach (var reference in references.Refs) {
                         builder.Append(' ', 50);
                         builder.AppendLine($"// Ref: {reference}");
                     }
                 }
-                i++;
             }
 
             return builder.ToString();

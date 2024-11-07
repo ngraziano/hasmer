@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace Hasmer {
     /// <summary>
@@ -207,13 +208,13 @@ namespace Hasmer {
             BigIntTable = new HbcGenericTableEntry[bigIntCount];
             BigIntStorage = ReadGenericTable(reader, BigIntTable, bigIntCount, Header.BigIntStorageSize);
 
-            ArrayBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ArrayBufferSize), this);
+            ArrayBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ArrayBufferSize), this,'A');
             reader.Align();
 
-            ObjectKeyBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ObjKeyBufferSize), this);
+            ObjectKeyBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ObjKeyBufferSize), this,'K');
             reader.Align();
 
-            ObjectValueBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ObjValueBufferSize), this);
+            ObjectValueBuffer = new HbcDataBuffer(reader.ReadBytes((int)Header.ObjValueBufferSize), this, 'V');
             reader.Align();
 
             RegExpTable = new HbcGenericTableEntry[Header.RegExpCount];
@@ -263,14 +264,15 @@ namespace Hasmer {
         /// Writes the Hermes bytecode file and serializes it to a byte array.
         /// </summary>
         public byte[] Write() {
+            Debug.Assert(false, "Need to be implemented");
             Header.StringCount = (uint)StringTable.Length;
             Header.StringKindCount = 0;
             Header.IdentifierCount = 0;
             Header.OverflowStringCount = 0;
             Header.StringStorageSize = 0;
-            Header.ArrayBufferSize = (uint)ArrayBuffer.Buffer.Length;
-            Header.ObjKeyBufferSize = (uint)ObjectKeyBuffer.Buffer.Length;
-            Header.ObjValueBufferSize = (uint)ObjectValueBuffer.Buffer.Length;
+            Header.ArrayBufferSize = (uint)0;
+            Header.ObjKeyBufferSize = (uint)0;
+            Header.ObjValueBufferSize = (uint)0;
             Header.FunctionCount = (uint)SmallFuncHeaders.Length;
 
             JObject def = ResourceManager.LoadJsonObject("BytecodeFileFormat");
@@ -459,7 +461,7 @@ namespace Hasmer {
 
                 if (isUTF16) {
                     length *= 2;
-                    Console.WriteLine($"    isUTF16; length = {length}");
+                    // Console.WriteLine($"    isUTF16; length = {length}");
                 }
 
                 byte[] stringBytes = new byte[length];

@@ -69,7 +69,9 @@ namespace Hasmer {
         /// <summary>
         /// The raw binary of the buffer.
         /// </summary>
-        public byte[] Buffer { get; set; }
+        private readonly byte[] buffer;
+
+        private char namePrefix;
 
         /// <summary>
         /// Reference to array element in the buffer.
@@ -80,16 +82,17 @@ namespace Hasmer {
         /// <summary>
         /// Creates a new HbcDataBuffer given the raw binary data in the buffer.
         /// </summary>
-        public HbcDataBuffer(byte[] buffer, HbcFile source) {
-            Buffer = buffer;
+        public HbcDataBuffer(byte[] buffer, HbcFile source, char namePrefix) {
+            this.buffer = buffer;
             this.source = source;
+            this.namePrefix = namePrefix;
         }
 
         /// <summary>
         /// Writes the serialized buffer to a stream.
         /// </summary>
         public void WriteAll(BinaryWriter writer) {
-            writer.Write(Buffer);
+            writer.Write(buffer);
         }
 
         /// <summary>
@@ -132,7 +135,7 @@ namespace Hasmer {
 
 
         public List<PrimitiveValue> GetElementSerie(long arrayBufferOffset, long arrayBufferLengh) {
-            using var ms = new MemoryStream(Buffer);
+            using var ms = new MemoryStream(buffer);
             using var reader = new BinaryReader(ms);
             ms.Position = arrayBufferOffset;
 
@@ -152,7 +155,7 @@ namespace Hasmer {
         }
 
         public (HbcDataBufferPrefix, List<PrimitiveValue>) GetOneSerie(long arrayBufferOffset) {
-            using var ms = new MemoryStream(Buffer);
+            using var ms = new MemoryStream(buffer);
             using var reader = new BinaryReader(ms);
             ms.Position = arrayBufferOffset;
 
@@ -167,7 +170,7 @@ namespace Hasmer {
         }
 
         public void AddRef(long arrayBufferOffset, long arrayBufferLengh, CodeRef codeRef) {
-            using var ms = new MemoryStream(Buffer);
+            using var ms = new MemoryStream(buffer);
             using var reader = new BinaryReader(ms);
             ms.Position = arrayBufferOffset;
 
@@ -180,7 +183,7 @@ namespace Hasmer {
                     elem.Refs.Add(codeRef);
                 } else {
                     References[offset] = new() {
-                        Name = $"{'A'}{References.Count}",
+                        Name = $"{namePrefix}{References.Count}",
                         Refs = { codeRef },
                     };
                 }
