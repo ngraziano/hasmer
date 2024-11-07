@@ -126,7 +126,7 @@ namespace Hasmer.Decompiler.Visitor {
             SyntaxNode closureAST = closureDecompiler.CreateAST(context);
             // SyntaxNode closureAST = new Identifier($"closure${closureId}");
 
-            // context.State.Registers[resultRegister] = closureAST;
+            context.State.Registers[resultRegister] = closureAST;
             // context.State.Registers[resultRegister] = new Identifier($"$closure${closureId}");
             context.Block.Body.Add(new AssignmentExpression {
                 Left = new Identifier($"r{resultRegister}"),

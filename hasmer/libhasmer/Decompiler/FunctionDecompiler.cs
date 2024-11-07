@@ -28,7 +28,7 @@ namespace Hasmer.Decompiler {
         /// </summary>
         static FunctionDecompiler() {
             Assembly visitorAssembly = typeof(VisitorCollectionAttribute).GetTypeInfo().Assembly;
-            IEnumerable<Type> collections = visitorAssembly.GetTypes().Where(type => type.GetCustomAttributes<VisitorCollectionAttribute>(true).Count() > 0);
+            IEnumerable<Type> collections = visitorAssembly.GetTypes().Where(type => type.GetCustomAttributes<VisitorCollectionAttribute>(true).Any());
             foreach (Type collection in collections) {
                 foreach (MethodInfo method in collection.GetMethods()) {
                     if (method.GetCustomAttributes<VisitorAttribute>(true).Count() > 0) {
@@ -38,7 +38,7 @@ namespace Hasmer.Decompiler {
                             method.GetParameters()[0].ParameterType != typeof(DecompilerContext)) {
                             throw new Exception("invalid visitor: must be of signature 'public static void (DecomilerContext)'");
                         }
-                        InstructionHandlers[method.Name] = context => method.Invoke(null, new object[] { context });
+                        InstructionHandlers[method.Name] = context => method.Invoke(null, [context]);
                     }
                 }
             }

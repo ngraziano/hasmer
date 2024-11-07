@@ -20,7 +20,7 @@ namespace Hasmer.Decompiler.Visitor {
             uint fromRegister = context.Instruction.Operands[1].GetValue<byte>();
 
             // TODO: context.State.Registers.MarkUsage here?
-
+            context.State.Registers[toRegister] = context.State.Registers[fromRegister];
             context.Block.WriteResult(toRegister, new Identifier($"r{fromRegister}"));
         }
 
@@ -31,12 +31,12 @@ namespace Hasmer.Decompiler.Visitor {
         public static void LoadParam(DecompilerContext context) {
             byte register = context.Instruction.Operands[0].GetValue<byte>();
             byte paramIndex = context.Instruction.Operands[1].GetValue<byte>();
-            string identifier = paramIndex switch {
-                0 => "this",
-                _ => "par" + paramIndex
+            var identifier = paramIndex switch {
+                0 => new Identifier("this"),
+                _ => new Identifier("par" + paramIndex)
             };
-
-            context.Block.WriteResult(register, new Identifier(identifier));
+            context.State.Registers[register] = identifier;
+            context.Block.WriteResult(register, identifier);
         }
 
         /// <summary>

@@ -26,5 +26,21 @@ namespace Hasmer.Decompiler.Visitor {
                 Argument = new Identifier($"r{sourceRegister}")
             });
         }
+
+        [Visitor]
+        public static void AddEmptyString(DecompilerContext context) {
+            byte resultRegister = context.Instruction.Operands[0].GetValue<byte>();
+            byte sourceRegister = context.Instruction.Operands[1].GetValue<byte>();
+
+            context.State.Registers[resultRegister] = context.State.Registers[sourceRegister];
+
+            // FIXME correct the empty string
+            context.Block.WriteResult(resultRegister, new BinaryExpression {
+                Left = new Identifier($"r{sourceRegister}"),
+                Right = new Literal(new PrimitiveNullValue()),
+                Operator = "+"
+            });
+
+        }
     }
 }
