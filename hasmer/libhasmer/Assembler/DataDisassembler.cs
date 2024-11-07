@@ -16,6 +16,7 @@ namespace Hasmer.Assembler {
         /// The Hermes bytecode file being disassembled.
         /// </summary>
         public HbcFile Source { get; set; }
+        public bool IsVerbose { get; set; }
 
         /// <summary>
         /// Creates a new DataDisassembler for a given Hermes bytecode file.
@@ -50,7 +51,7 @@ namespace Hasmer.Assembler {
         public string Disassemble() {
             StringBuilder builder = new StringBuilder();
             int i = 0;
-            foreach (var(offset,references) in buffer.References) {
+            foreach (var (offset, references) in buffer.References) {
 
                 var (listPrefix, listelement) = buffer.GetOneSerie(offset);
 
@@ -59,16 +60,28 @@ namespace Hasmer.Assembler {
                     case HbcDataBufferTagType.Null:
                     case HbcDataBufferTagType.True:
                     case HbcDataBufferTagType.False:
-                        builder.AppendLine($".data {references.Name} Off:{offset} {listPrefix.TagType}[{listelement.Count}]");
-                        continue;
+                        builder.Append($".data {references.Name} {listPrefix.TagType}[{listelement.Count}]");
+                        break;
                     default:
+                        string tagType = listPrefix.TagType switch {
+                            HbcDataBufferTagType.ByteString or HbcDataBufferTagType.ShortString or HbcDataBufferTagType.LongString => "String",
+                            _ => listPrefix.TagType.ToString()
+                        };
+                        builder.Append($".data {references.Name} {tagType}[{listelement.Count}] {{ {string.Join(", ", listelement.Select(l => l.ToAsmString()))} }}");
                         break;
                 }
-                string tagType = listPrefix.TagType switch {
-                    HbcDataBufferTagType.ByteString or HbcDataBufferTagType.ShortString or HbcDataBufferTagType.LongString => "String",
-                    _ => listPrefix.TagType.ToString()
-                };
-                builder.AppendLine($".data {references.Name} Off:{offset} {tagType}[{listelement.Count}] {{ {string.Join(", ", listelement.Select(l => l.ToAsmString()))} }}");
+                if(IsVerbose) {
+                    builder.AppendLine($" // offset {offset} ");
+                } else {
+                    builder.AppendLine();
+                }
+
+                if(IsVerbose) {
+                    foreach (var reference in references.Refs) {
+                        builder.Append(' ', 50);
+                        builder.AppendLine($"// Ref: {reference}");
+                    }
+                }
                 i++;
             }
 

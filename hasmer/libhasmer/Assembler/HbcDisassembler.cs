@@ -64,7 +64,9 @@ namespace Hasmer.Assembler {
             
 
             builder.AppendLine();
-            var dataDisassembler = new DataDisassembler(Source, Source.ArrayBuffer, 'A');
+            var dataDisassembler = new DataDisassembler(Source, Source.ArrayBuffer, 'A') {
+                IsVerbose = Options.IsVerbose
+            };
             builder.AppendLine(dataDisassembler.Disassemble());
             builder.AppendLine();
 
