@@ -71,7 +71,7 @@ namespace Hasmer {
             };
         }
 
-        public static bool CanStoreInteger(this HbcInstructionOperandType opType, ulong integer) {
+        public static bool CanStoreInteger(this HbcInstructionOperandType opType, long integer) {
             switch (opType) {
                 case HbcInstructionOperandType.Reg8:
                 case HbcInstructionOperandType.UInt8:

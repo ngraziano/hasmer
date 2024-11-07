@@ -60,7 +60,7 @@ namespace Hasmer.Assembler.Visitor {
                     case HasmOperandTokenType.Register:
                     case HasmOperandTokenType.Label:
                     case HasmOperandTokenType.UInt:
-                        ulong value = operand.Value.GetIntegerValue();
+                        long value = operand.Value.GetIntegerValue();
                         if (!type.CanStoreInteger(value)) {
                             return false;
                         }

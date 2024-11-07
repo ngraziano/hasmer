@@ -156,8 +156,10 @@ namespace Hasmer.Assembler {
         /// Returns the label-name of an item in the array buffer.
         /// </summary>
         private string DisassembleArray(uint arrayBufferIndex) {
-            
-            return $"A{arrayBufferIndex}";
+            if(Source.ArrayBuffer.References.TryGetValue(arrayBufferIndex, out var references)) {
+                return references.Name;
+            }
+            return $"INVALID_ARRAY@{arrayBufferIndex}";
         }
 
         private string AnnotateObject(uint keyBufferIndex, uint valueBufferIndex, ushort length) {

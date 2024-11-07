@@ -17,7 +17,7 @@ namespace Hasmer {
         /// Returns the raw value coerced to a ulong.
         /// The the raw value is not an integer type, an exception is thrown.
         /// </summary>
-        public abstract ulong GetIntegerValue();
+        public abstract long GetIntegerValue();
 
         /// <summary>
         /// Returns the raw value coerced to type T.
@@ -39,7 +39,7 @@ namespace Hasmer {
 
         public override object RawValue => source.GetStringTableEntry(idx).Value;
 
-        public override ulong GetIntegerValue() {
+        public override long GetIntegerValue() {
             throw new Exception("cannot get integer value of non-integer PrimitiveValue");
         }
 
@@ -71,7 +71,7 @@ namespace Hasmer {
 
         public override object RawValue => typedValue;
 
-        public override ulong GetIntegerValue() {
+        public override long GetIntegerValue() {
             throw new Exception("cannot get integer value of non-integer PrimitiveValue");
         }
 
@@ -101,7 +101,7 @@ namespace Hasmer {
 
         public override object RawValue => typedValue;
 
-        public override ulong GetIntegerValue() => (ulong)typedValue;
+        public override long GetIntegerValue() => typedValue;
         public override T GetValue<T>() => (T)Convert.ChangeType(typedValue, typeof(T));
 
         public override string ToString() => typedValue.ToString(CultureInfo.InvariantCulture);
@@ -124,7 +124,7 @@ namespace Hasmer {
 
         public override object? RawValue => null;
 
-        public override ulong GetIntegerValue() {
+        public override long GetIntegerValue() {
             throw new Exception("cannot get integer value of non-integer PrimitiveValue");
         }
 
@@ -153,7 +153,7 @@ namespace Hasmer {
 
         public override object? RawValue => typedValue;
 
-        public override ulong GetIntegerValue() {
+        public override long GetIntegerValue() {
             throw new Exception("cannot get integer value of non-integer PrimitiveValue");
         }
 

@@ -25,17 +25,11 @@ namespace Hasmer.Decompiler {
         public HbcFile Source { get; set; }
 
         /// <summary>
-        /// The disassembler used for parsing data from the bytecode file's data buffers.
-        /// </summary>
-        public DataDisassembler DataDisassembler { get; set; }
-
-        /// <summary>
         /// Creates a new HbcDecompiler given the bytecode file to decompile and the options to be used for decompiling.
         /// </summary>
         public HbcDecompiler(HbcFile source, DecompilerOptions options) {
             Source = source;
             Options = options;
-            DataDisassembler = new DataDisassembler(source);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hasmer.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,10 +15,6 @@ namespace Hasmer.Assembler {
         /// </summary>
         public HbcFile Source { get; }
 
-        /// <summary>
-        /// The disassembler for data. Data is disassembled separately from code, and this property is the disassembler object.
-        /// </summary>
-        public DataDisassembler DataDisassembler { get; private set; }
 
         /// <summary>
         /// The specified options to be used for the processing of Hermes bytecode and output of Hasm assembly.
@@ -31,7 +28,6 @@ namespace Hasmer.Assembler {
         public HbcDisassembler(HbcFile source, DisassemblerOptions options) {
             Source = source;
             Options = options;
-            DataDisassembler = new DataDisassembler(source);
         }
 
         /// <summary>
@@ -47,9 +43,32 @@ namespace Hasmer.Assembler {
                 builder.AppendLine(" auto");
             }
 
-         
+            Console.WriteLine("Check references... ");
+            foreach (var funcHeader in Source.SmallFuncHeaders) {
+                var header = funcHeader.GetAssemblerHeader();
+                foreach (var instr in header.Disassemble()) {
+                    // TODO see if we can make better
+                    switch (Source.BytecodeFormat.Definitions[instr.Opcode].Name) {
+                        case "NewArrayWithBuffer":
+                        case "NewArrayWithBufferLong":
+                            if (instr.Operands[3].Value is PrimitiveIntegerValue offset 
+                                && instr.Operands[2].Value is PrimitiveIntegerValue size) {
+                                Source.ArrayBuffer.AddRef(offset.GetIntegerValue(), size.GetIntegerValue(),new CodeRef(funcHeader.FunctionId,instr.Offset));
+                            }
+                            break;
+                    }
+                }
+            }
 
-            Console.Write("Disassembling functions... ");
+            Console.WriteLine("Disassembling data... ");
+            
+
+            builder.AppendLine();
+            var dataDisassembler = new DataDisassembler(Source, Source.ArrayBuffer, 'A');
+            builder.AppendLine(dataDisassembler.Disassemble());
+            builder.AppendLine();
+
+            Console.WriteLine("Disassembling functions... ");
             using (ConsoleProgressBar progress = new ConsoleProgressBar()) {
                 for (int i = 0; i < Source.SmallFuncHeaders.Length; i++) {
                     progress.Report(i / (double)Source.SmallFuncHeaders.Length);
@@ -60,10 +79,7 @@ namespace Hasmer.Assembler {
                     builder.AppendLine();
                 }
             }
-            Console.Write("Disassembling data... ");
 
-            builder.AppendLine();
-            builder.AppendLine(DataDisassembler.Disassemble());
             Console.WriteLine("done!");
 
             return builder.ToString();

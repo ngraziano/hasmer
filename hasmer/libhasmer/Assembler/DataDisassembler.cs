@@ -9,6 +9,9 @@ namespace Hasmer.Assembler {
     /// Used for diassembling the data section of a Hermes bytecode file.
     /// </summary>
     public class DataDisassembler {
+        private readonly HbcDataBuffer buffer;
+        private readonly char prefix;
+
         /// <summary>
         /// The Hermes bytecode file being disassembled.
         /// </summary>
@@ -17,8 +20,11 @@ namespace Hasmer.Assembler {
         /// <summary>
         /// Creates a new DataDisassembler for a given Hermes bytecode file.
         /// </summary>
-        public DataDisassembler(HbcFile source) {
+        public DataDisassembler(HbcFile source, HbcDataBuffer arrayBuffer, char prefix) {
             Source = source;
+
+            this.buffer = arrayBuffer;
+            this.prefix = prefix;
         }
 
         /// <summary>
@@ -41,43 +47,36 @@ namespace Hasmer.Assembler {
         /// <summary>
         /// Writes an entire buffer (i.e. key/array/value/etc.) as disassembly.
         /// </summary>
-        private void AppendDisassembly(StringBuilder builder, List<HbcDataBufferItems> buffer, char prefix) {
-            for (int i = 0; i < buffer.Count; i++) {
-                HbcDataBufferItems items = buffer[i];
-                switch (items.TagType) {
+        public string Disassemble() {
+            StringBuilder builder = new StringBuilder();
+            int i = 0;
+            foreach (var(offset,references) in buffer.References) {
+
+                var (listPrefix, listelement) = buffer.GetOneSerie(offset);
+
+
+                switch (listPrefix.TagType) {
                     case HbcDataBufferTagType.Null:
                     case HbcDataBufferTagType.True:
                     case HbcDataBufferTagType.False:
-                        builder.AppendLine($".data {prefix}{i} Off:{items.Offset} {items.TagType}[]");
+                        builder.AppendLine($".data {references.Name} Off:{offset} {listPrefix.TagType}[{listelement.Count}]");
                         continue;
                     default:
                         break;
                 }
-                string tagType = items.TagType switch {
+                string tagType = listPrefix.TagType switch {
                     HbcDataBufferTagType.ByteString or HbcDataBufferTagType.ShortString or HbcDataBufferTagType.LongString => "String",
-                    _ => items.TagType.ToString()
+                    _ => listPrefix.TagType.ToString()
                 };
-                builder.AppendLine($".data {prefix}{i} Off:{items.Offset} {tagType}[] {items.Item.ToAsmString()}");
+                builder.AppendLine($".data {references.Name} Off:{offset} {tagType}[{listelement.Count}] {{ {string.Join(", ", listelement.Select(l => l.ToAsmString()))} }}");
+                i++;
             }
-            if (buffer.Count > 0) {
-                builder.AppendLine();
-            }
-        }
-
-
-
-        /// <summary>
-        /// Disassembles the Hermes bytecode data buffers and returns a string representing the disassembly.
-        /// </summary>
-        public string Disassemble() {
-            StringBuilder builder = new StringBuilder();
-
-         
-            //AppendDisassembly(builder, ArrayBuffer, 'A');
-            //AppendDisassembly(builder, KeyBuffer, 'K');
-            //AppendDisassembly(builder, ValueBuffer, 'V');
 
             return builder.ToString();
         }
+
+
+
+
     }
 }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Hasmer.Common;
+using System.Runtime.CompilerServices;
 
 namespace Hasmer {
     /// <summary>
@@ -53,6 +55,11 @@ namespace Hasmer {
         public required uint Offset { get; set; }
     }
 
+    public record SizeAndRefs {
+        public required string Name { get; init; }
+        public List<CodeRef> Refs { get; } = [];
+    }
+
     /// <summary>
     /// Represents a Hermes data buffer, such as the array buffer.
     /// </summary>
@@ -63,6 +70,12 @@ namespace Hasmer {
         /// The raw binary of the buffer.
         /// </summary>
         public byte[] Buffer { get; set; }
+
+        /// <summary>
+        /// Reference to array element in the buffer.
+        /// </summary>
+        public Dictionary<long, SizeAndRefs> References { get; } = [];
+
 
         /// <summary>
         /// Creates a new HbcDataBuffer given the raw binary data in the buffer.
@@ -136,6 +149,50 @@ namespace Hasmer {
             }
 
             return result;
+        }
+
+        public (HbcDataBufferPrefix, List<PrimitiveValue>) GetOneSerie(long arrayBufferOffset) {
+            using var ms = new MemoryStream(Buffer);
+            using var reader = new BinaryReader(ms);
+            ms.Position = arrayBufferOffset;
+
+            var result = new List<PrimitiveValue>();
+            var prefix = ReadTagType(reader);
+            for (int i = 0; i < prefix.Length && ms.Position < ms.Length; i++) {
+                var value = ReadValue(source, prefix.TagType, reader);
+                result.Add(value);
+            }
+
+            return (prefix, result);
+        }
+
+        public void AddRef(long arrayBufferOffset, long arrayBufferLengh, CodeRef codeRef) {
+            using var ms = new MemoryStream(Buffer);
+            using var reader = new BinaryReader(ms);
+            ms.Position = arrayBufferOffset;
+
+            long nbElem = 0;
+            while (nbElem < arrayBufferLengh) {
+                var offset = ms.Position;
+                var prefix = ReadTagType(reader);
+                var nbWantedElement = Math.Min(arrayBufferLengh - nbElem, prefix.Length);
+                if (References.TryGetValue(offset, out var elem)) {
+                    elem.Refs.Add(codeRef);
+                } else {
+                    References[offset] = new() {
+                        Name = $"{'A'}{References.Count}",
+                        Refs = { codeRef },
+                    };
+                }
+
+                nbElem += prefix.Length;
+                // skip data if need more element
+                if (nbElem < arrayBufferLengh) {
+                    for (int i = 0; i < prefix.Length; i++) {
+                        ReadValue(source, prefix.TagType, reader);
+                    }
+                }
+            }
         }
     }
 }
