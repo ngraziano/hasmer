@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Hasmer.Common;
-using System.Runtime.CompilerServices;
 
 namespace Hasmer {
     /// <summary>
@@ -55,7 +54,7 @@ namespace Hasmer {
         public required uint Offset { get; set; }
     }
 
-    public record SizeAndRefs {
+    public record NameAndRefs {
         public required string Name { get; init; }
         public List<CodeRef> Refs { get; } = [];
     }
@@ -76,7 +75,7 @@ namespace Hasmer {
         /// <summary>
         /// Reference to array element in the buffer.
         /// </summary>
-        public Dictionary<long, SizeAndRefs> References { get; } = [];
+        public Dictionary<long, NameAndRefs> References { get; } = [];
 
 
         /// <summary>

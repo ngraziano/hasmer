@@ -22,7 +22,7 @@ namespace Hasmer {
                 return "null";
             }
             StringBuilder literal = new StringBuilder(s.Length + 2);
-            literal.Append("\"");
+            literal.Append('"');
             foreach (char c in s) {
                 switch (c) {
                     case '\"': literal.Append("\\\""); break;
@@ -47,7 +47,7 @@ namespace Hasmer {
                         break;
                 }
             }
-            literal.Append("\"");
+            literal.Append('"');
             return literal.ToString();
         }
 

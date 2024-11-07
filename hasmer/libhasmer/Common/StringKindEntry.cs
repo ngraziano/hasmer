@@ -35,8 +35,8 @@ namespace Hasmer {
             Entry = (uint)kind | (count & MaxCount);
         }
 
-        public StringKind Kind => (StringKind)(Entry & ~MaxCount);
+        public readonly StringKind Kind => (StringKind)(Entry & ~MaxCount);
 
-        public int Count => (int)(Entry & MaxCount);
+        public readonly int Count => (int)(Entry & MaxCount);
     }
 }

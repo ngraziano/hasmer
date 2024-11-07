@@ -21,11 +21,8 @@ namespace Hasmer {
         public static string ReadEmbeddedResource(string name) {
             Assembly assembly = Assembly.GetExecutingAssembly();
 
-            using Stream stream = assembly.GetManifestResourceStream("Hasmer.Resources." + name + ".json") ?? throw new ArgumentOutOfRangeException(nameof(name));
-            if (stream == null) {
-                throw new Exception("embedded resource does not exist: " + name);
-            }
-            using StreamReader reader = new StreamReader(stream);
+            using Stream stream = assembly.GetManifestResourceStream("Hasmer.Resources." + name + ".json") ?? throw new ArgumentOutOfRangeException(nameof(name), "embedded resource does not exist: " + name);
+            using var reader = new StreamReader(stream);
             return reader.ReadToEnd();
         }
 
